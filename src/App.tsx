@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./components/AuthProvider";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import { Layout } from "./components/Layout";
 import Index from "./pages/Index";
 import AuthPage from "./pages/Auth";
 import ProjectDetail from "./pages/ProjectDetail";
@@ -24,7 +25,9 @@ const App = () => (
               path="/"
               element={
                 <ProtectedRoute>
-                  <Index />
+                  <Layout>
+                    <Index />
+                  </Layout>
                 </ProtectedRoute>
               }
             />
@@ -32,7 +35,9 @@ const App = () => (
               path="/project/:projectId"
               element={
                 <ProtectedRoute>
-                  <ProjectDetail />
+                  <Layout>
+                    <ProjectDetail />
+                  </Layout>
                 </ProtectedRoute>
               }
             />
