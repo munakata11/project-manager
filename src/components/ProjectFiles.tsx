@@ -25,8 +25,7 @@ export function ProjectFiles({ projectId }: ProjectFilesProps) {
         .select(`
           *,
           uploaded_by:profiles (
-            full_name,
-            avatar_url
+            full_name
           )
         `)
         .eq("project_id", projectId)
@@ -103,7 +102,7 @@ export function ProjectFiles({ projectId }: ProjectFilesProps) {
         </div>
       </CardHeader>
       <CardContent>
-        <FileList files={files} projectId={projectId} onRefetch={refetch} />
+        <FileList files={files || []} projectId={projectId} onRefetch={refetch} />
       </CardContent>
     </Card>
   );

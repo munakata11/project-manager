@@ -5,7 +5,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { Download, Trash2 } from "lucide-react";
 
 interface FileListProps {
-  files: any[];
+  files: {
+    id: string;
+    filename: string;
+    file_path: string;
+    created_at: string;
+    size: number;
+    uploaded_by: {
+      full_name: string | null;
+    } | null;
+  }[];
   projectId: string;
   onRefetch: () => void;
 }

@@ -3,7 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
 import { Plus } from "lucide-react";
 import { CreateNoteDialog } from "./CreateNoteDialog";
 
@@ -18,13 +17,11 @@ interface Note {
   created_at: string;
   created_by: {
     full_name: string | null;
-    avatar_url: string | null;
   } | null;
 }
 
 export function MeetingNotes({ projectId }: MeetingNotesProps) {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const { toast } = useToast();
 
   const { data: notes, isLoading } = useQuery({
     queryKey: ["meeting-notes", projectId],
@@ -34,8 +31,7 @@ export function MeetingNotes({ projectId }: MeetingNotesProps) {
         .select(`
           *,
           created_by:profiles (
-            full_name,
-            avatar_url
+            full_name
           )
         `)
         .eq("project_id", projectId)
