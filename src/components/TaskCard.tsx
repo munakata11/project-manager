@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -89,26 +90,35 @@ export const TaskCard = ({ task, projectId }: TaskCardProps) => {
     <Card className="bg-white border-gray-100 hover:border-purple-100 transition-colors">
       <CardContent className="p-4">
         <div className="flex items-center justify-between">
-          <div className="space-y-2">
-            <h3 className="font-medium text-gray-900">{task.title}</h3>
-            {task.description && (
-              <p className="text-sm text-gray-500">{task.description}</p>
-            )}
-            <div className="flex items-center gap-4">
-              {task.due_date && (
-                <div className="flex items-center gap-1.5 text-sm text-gray-500">
-                  <CalendarDays className="h-4 w-4 text-gray-400" />
-                  <span>
-                    期限: {new Date(task.due_date).toLocaleDateString("ja-JP")}
-                  </span>
-                </div>
+          <div className="flex items-center gap-3">
+            <Checkbox
+              checked={task.status === "完了"}
+              onCheckedChange={(checked) => {
+                handleStatusChange(checked ? "完了" : "進行中");
+              }}
+              disabled={isLoading}
+            />
+            <div className="space-y-2">
+              <h3 className="font-medium text-gray-900">{task.title}</h3>
+              {task.description && (
+                <p className="text-sm text-gray-500">{task.description}</p>
               )}
-              {task.assignee && (
-                <div className="flex items-center gap-1.5 text-sm text-gray-500">
-                  <User className="h-4 w-4 text-gray-400" />
-                  <span>{task.assignee.full_name}</span>
-                </div>
-              )}
+              <div className="flex items-center gap-4">
+                {task.due_date && (
+                  <div className="flex items-center gap-1.5 text-sm text-gray-500">
+                    <CalendarDays className="h-4 w-4 text-gray-400" />
+                    <span>
+                      期限: {new Date(task.due_date).toLocaleDateString("ja-JP")}
+                    </span>
+                  </div>
+                )}
+                {task.assignee && (
+                  <div className="flex items-center gap-1.5 text-sm text-gray-500">
+                    <User className="h-4 w-4 text-gray-400" />
+                    <span>{task.assignee.full_name}</span>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
           <DropdownMenu>
