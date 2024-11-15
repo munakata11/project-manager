@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -35,45 +34,54 @@ const Index = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Projects</h1>
+          <div>
+            <h1 className="text-2xl font-semibold text-gray-900">Projects</h1>
+            <p className="mt-1 text-sm text-gray-500">Manage your ongoing projects</p>
+          </div>
           <CreateProjectDialog />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {projects?.map((project) => (
-            <Card key={project.id} className="hover:shadow-lg transition-shadow cursor-pointer"
-                  onClick={() => navigate(`/project/${project.id}`)}>
-              <CardHeader>
-                <CardTitle className="text-xl">{project.title}</CardTitle>
-                <CardDescription>{project.description}</CardDescription>
+            <Card 
+              key={project.id} 
+              className="group hover:shadow-lg transition-all duration-200 cursor-pointer bg-white border-gray-100"
+              onClick={() => navigate(`/project/${project.id}`)}
+            >
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg font-semibold text-gray-900">{project.title}</CardTitle>
+                <CardDescription className="text-sm text-gray-500 line-clamp-2">{project.description}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   <div>
-                    <div className="flex justify-between text-sm text-gray-500 mb-1">
+                    <div className="flex justify-between text-sm text-gray-500 mb-1.5">
                       <span>Progress</span>
                       <span>{project.progress}%</span>
                     </div>
-                    <Progress value={project.progress} className="h-2" />
+                    <Progress 
+                      value={project.progress} 
+                      className="h-2 bg-gray-100" 
+                    />
                   </div>
                   
                   <div className="flex justify-between text-sm text-gray-500">
-                    <div className="flex items-center gap-1">
-                      <Users className="h-4 w-4" />
+                    <div className="flex items-center gap-1.5">
+                      <Users className="h-4 w-4 text-gray-400" />
                       <span>{project.project_members?.length || 0} members</span>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <CalendarDays className="h-4 w-4" />
+                    <div className="flex items-center gap-1.5">
+                      <CalendarDays className="h-4 w-4 text-gray-400" />
                       <span>{new Date(project.created_at).toLocaleDateString()}</span>
                     </div>
                   </div>

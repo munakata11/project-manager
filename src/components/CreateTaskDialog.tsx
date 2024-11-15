@@ -40,8 +40,8 @@ export const CreateTaskDialog = ({ projectId }: CreateTaskDialogProps) => {
       if (error) throw error;
 
       toast({
-        title: "Task created",
-        description: "Your task has been created successfully.",
+        title: "Success",
+        description: "Task created successfully.",
       });
 
       setOpen(false);
@@ -58,14 +58,14 @@ export const CreateTaskDialog = ({ projectId }: CreateTaskDialogProps) => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" className="bg-purple-600 hover:bg-purple-700">
+        <Button size="sm" className="bg-purple-600 hover:bg-purple-700 text-white">
           <Plus className="w-4 h-4 mr-2" />
           Add Task
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Create New Task</DialogTitle>
+          <DialogTitle className="text-lg font-semibold text-gray-900">Create New Task</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -74,9 +74,9 @@ export const CreateTaskDialog = ({ projectId }: CreateTaskDialogProps) => {
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Title</FormLabel>
+                  <FormLabel className="text-sm font-medium text-gray-700">Title</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter task title" {...field} />
+                    <Input placeholder="Enter task title" className="border-gray-200" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -87,9 +87,9 @@ export const CreateTaskDialog = ({ projectId }: CreateTaskDialogProps) => {
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel className="text-sm font-medium text-gray-700">Description</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Enter task description" {...field} />
+                    <Textarea placeholder="Enter task description" className="border-gray-200" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -100,15 +100,17 @@ export const CreateTaskDialog = ({ projectId }: CreateTaskDialogProps) => {
               name="due_date"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Due Date</FormLabel>
+                  <FormLabel className="text-sm font-medium text-gray-700">Due Date</FormLabel>
                   <FormControl>
-                    <Input type="datetime-local" {...field} />
+                    <Input type="datetime-local" className="border-gray-200" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full">Create Task</Button>
+            <Button type="submit" className="w-full bg-purple-600 hover:bg-purple-700 text-white">
+              Create Task
+            </Button>
           </form>
         </Form>
       </DialogContent>
