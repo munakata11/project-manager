@@ -5,6 +5,7 @@ import { useAuth } from "@/components/AuthProvider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { CalendarDays, List, User, Users } from "lucide-react";
+import { CreateTaskDialog } from "@/components/CreateTaskDialog";
 
 const ProjectDetail = () => {
   const { projectId } = useParams();
@@ -68,7 +69,6 @@ const ProjectDetail = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Project Overview Card */}
           <Card className="lg:col-span-1">
             <CardHeader>
               <CardTitle className="text-xl">Overview</CardTitle>
@@ -96,16 +96,10 @@ const ProjectDetail = () => {
             </CardContent>
           </Card>
 
-          {/* Tasks Card */}
           <Card className="lg:col-span-2">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-xl">Tasks</CardTitle>
-              <button
-                onClick={() => {/* TODO: Implement task creation */}}
-                className="bg-purple-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-purple-700 transition-colors"
-              >
-                Add Task
-              </button>
+              <CreateTaskDialog projectId={project.id} />
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -119,6 +113,11 @@ const ProjectDetail = () => {
                       <div>
                         <h3 className="font-medium">{task.title}</h3>
                         <p className="text-sm text-gray-500">{task.description}</p>
+                        {task.due_date && (
+                          <p className="text-sm text-gray-500">
+                            Due: {new Date(task.due_date).toLocaleDateString()}
+                          </p>
+                        )}
                       </div>
                     </div>
                     {task.assignee && (
