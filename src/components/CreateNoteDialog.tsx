@@ -17,14 +17,18 @@ interface CreateNoteDialogProps {
   projectId: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  noteType: "meeting" | "call";
+  title: string;
 }
 
 export function CreateNoteDialog({
   projectId,
   open,
   onOpenChange,
+  noteType,
+  title,
 }: CreateNoteDialogProps) {
-  const [title, setTitle] = useState("");
+  const [noteTitle, setNoteTitle] = useState("");
   const [content, setContent] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -33,32 +37,32 @@ export function CreateNoteDialog({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title || !content) return;
+    if (!noteTitle || !content) return;
 
     try {
       setIsLoading(true);
       const { error } = await supabase.from("meeting_notes").insert({
         project_id: projectId,
-        title,
+        title: noteTitle,
         content,
-        note_type: "meeting",
+        note_type: noteType,
         created_by: session?.user.id,
       });
 
       if (error) throw error;
 
       toast({
-        title: "議事録を作成しました",
+        title: noteType === "meeting" ? "議事録を作成しました" : "電話メモを作成しました",
       });
 
       queryClient.invalidateQueries({ queryKey: ["meeting-notes", projectId] });
       onOpenChange(false);
-      setTitle("");
+      setNoteTitle("");
       setContent("");
     } catch (error) {
       toast({
         title: "エラー",
-        description: "議事録の作成に失敗しました。",
+        description: noteType === "meeting" ? "議事録の作成に失敗しました。" : "電話メモの作成に失敗しました。",
         variant: "destructive",
       });
     } finally {
@@ -70,14 +74,14 @@ export function CreateNoteDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>議事録・電話メモの作成</DialogTitle>
+          <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Input
               placeholder="タイトル"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              value={noteTitle}
+              onChange={(e) => setNoteTitle(e.target.value)}
               required
             />
           </div>
