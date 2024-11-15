@@ -4,8 +4,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/AuthProvider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { CalendarDays, List, User, Users } from "lucide-react";
+import { CalendarDays, List, Users } from "lucide-react";
 import { CreateTaskDialog } from "@/components/CreateTaskDialog";
+import { ProjectMembersDialog } from "@/components/ProjectMembersDialog";
+import { TaskCard } from "@/components/TaskCard";
 
 const ProjectDetail = () => {
   const { projectId } = useParams();
@@ -37,6 +39,25 @@ const ProjectDetail = () => {
         .single();
 
       if (error) throw error;
+
+      // タスクの完了率からプロジェクトの進捗を計算
+      if (data.tasks && data.tasks.length > 0) {
+        const completedTasks = data.tasks.filter(
+          (task) => task.status === "完了"
+        ).length;
+        const progress = Math.round(
+          (completedTasks / data.tasks.length) * 100
+        );
+        
+        // プロジェクトの進捗を更新
+        await supabase
+          .from("projects")
+          .update({ progress })
+          .eq("id", projectId);
+        
+        data.progress = progress;
+      }
+
       return data;
     },
   });
@@ -53,8 +74,12 @@ const ProjectDetail = () => {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <h1 className="text-2xl font-semibold text-gray-900">プロジェクトが見つかりません</h1>
-          <p className="text-gray-500">お探しのプロジェクトは存在しません。</p>
+          <h1 className="text-2xl font-semibold text-gray-900">
+            プロジェクトが見つかりません
+          </h1>
+          <p className="text-gray-500">
+            お探しのプロジェクトは存在しません。
+          </p>
         </div>
       </div>
     );
@@ -70,7 +95,9 @@ const ProjectDetail = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="lg:col-span-1 bg-white border-gray-100">
           <CardHeader className="pb-3">
-            <CardTitle className="text-lg font-semibold text-gray-900">概要</CardTitle>
+            <CardTitle className="text-lg font-semibold text-gray-900">
+              概要
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -81,10 +108,12 @@ const ProjectDetail = () => {
                 </div>
                 <Progress value={project.progress} className="h-2 bg-gray-100" />
               </div>
-              
+
               <div className="flex items-center gap-2 text-sm text-gray-500">
                 <CalendarDays className="h-4 w-4 text-gray-400" />
-                <span>作成日: {new Date(project.created_at).toLocaleDateString('ja-JP')}</span>
+                <span>
+                  作成日: {new Date(project.created_at).toLocaleDateString("ja-JP")}
+                </span>
               </div>
 
               <div className="flex items-center gap-2 text-sm text-gray-500">
@@ -97,35 +126,21 @@ const ProjectDetail = () => {
 
         <Card className="lg:col-span-2 bg-white border-gray-100">
           <CardHeader className="flex flex-row items-center justify-between pb-3">
-            <CardTitle className="text-lg font-semibold text-gray-900">タスク</CardTitle>
-            <CreateTaskDialog projectId={project.id} />
+            <CardTitle className="text-lg font-semibold text-gray-900">
+              タスク
+            </CardTitle>
+            <div className="flex gap-2">
+              <ProjectMembersDialog
+                projectId={project.id}
+                currentMembers={project.project_members || []}
+              />
+              <CreateTaskDialog projectId={project.id} />
+            </div>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               {project.tasks?.map((task) => (
-                <div
-                  key={task.id}
-                  className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100 hover:border-purple-100 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <List className="h-4 w-4 text-gray-400" />
-                    <div>
-                      <h3 className="font-medium text-gray-900">{task.title}</h3>
-                      <p className="text-sm text-gray-500">{task.description}</p>
-                      {task.due_date && (
-                        <p className="text-sm text-gray-500 mt-0.5">
-                          期限: {new Date(task.due_date).toLocaleDateString('ja-JP')}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  {task.assignee && (
-                    <div className="flex items-center gap-2">
-                      <User className="h-4 w-4 text-gray-400" />
-                      <span className="text-sm text-gray-500">{task.assignee.full_name}</span>
-                    </div>
-                  )}
-                </div>
+                <TaskCard key={task.id} task={task} projectId={project.id} />
               ))}
             </div>
           </CardContent>
