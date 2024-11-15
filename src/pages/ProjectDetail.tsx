@@ -53,8 +53,8 @@ const ProjectDetail = () => {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <h1 className="text-2xl font-semibold text-gray-900">Project not found</h1>
-          <p className="text-gray-500">The project you're looking for doesn't exist.</p>
+          <h1 className="text-2xl font-semibold text-gray-900">プロジェクトが見つかりません</h1>
+          <p className="text-gray-500">お探しのプロジェクトは存在しません。</p>
         </div>
       </div>
     );
@@ -70,13 +70,13 @@ const ProjectDetail = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="lg:col-span-1 bg-white border-gray-100">
           <CardHeader className="pb-3">
-            <CardTitle className="text-lg font-semibold text-gray-900">Overview</CardTitle>
+            <CardTitle className="text-lg font-semibold text-gray-900">概要</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div>
                 <div className="flex justify-between text-sm text-gray-500 mb-1.5">
-                  <span>Progress</span>
+                  <span>進捗</span>
                   <span>{project.progress}%</span>
                 </div>
                 <Progress value={project.progress} className="h-2 bg-gray-100" />
@@ -84,12 +84,12 @@ const ProjectDetail = () => {
               
               <div className="flex items-center gap-2 text-sm text-gray-500">
                 <CalendarDays className="h-4 w-4 text-gray-400" />
-                <span>Created {new Date(project.created_at).toLocaleDateString()}</span>
+                <span>作成日: {new Date(project.created_at).toLocaleDateString('ja-JP')}</span>
               </div>
 
               <div className="flex items-center gap-2 text-sm text-gray-500">
                 <Users className="h-4 w-4 text-gray-400" />
-                <span>{project.project_members?.length || 0} members</span>
+                <span>{project.project_members?.length || 0} メンバー</span>
               </div>
             </div>
           </CardContent>
@@ -97,7 +97,7 @@ const ProjectDetail = () => {
 
         <Card className="lg:col-span-2 bg-white border-gray-100">
           <CardHeader className="flex flex-row items-center justify-between pb-3">
-            <CardTitle className="text-lg font-semibold text-gray-900">Tasks</CardTitle>
+            <CardTitle className="text-lg font-semibold text-gray-900">タスク</CardTitle>
             <CreateTaskDialog projectId={project.id} />
           </CardHeader>
           <CardContent>
@@ -114,7 +114,7 @@ const ProjectDetail = () => {
                       <p className="text-sm text-gray-500">{task.description}</p>
                       {task.due_date && (
                         <p className="text-sm text-gray-500 mt-0.5">
-                          Due: {new Date(task.due_date).toLocaleDateString()}
+                          期限: {new Date(task.due_date).toLocaleDateString('ja-JP')}
                         </p>
                       )}
                     </div>

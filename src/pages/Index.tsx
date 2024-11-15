@@ -44,8 +44,8 @@ const Index = () => {
     <div>
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900">Projects</h1>
-          <p className="mt-1 text-sm text-gray-500">Manage your ongoing projects</p>
+          <h1 className="text-2xl font-semibold text-gray-900">プロジェクト一覧</h1>
+          <p className="mt-1 text-sm text-gray-500">進行中のプロジェクトを管理</p>
         </div>
         <CreateProjectDialog />
       </div>
@@ -65,7 +65,7 @@ const Index = () => {
               <div className="space-y-4">
                 <div>
                   <div className="flex justify-between text-sm text-gray-500 mb-1.5">
-                    <span>Progress</span>
+                    <span>進捗</span>
                     <span>{project.progress}%</span>
                   </div>
                   <Progress 
@@ -77,11 +77,11 @@ const Index = () => {
                 <div className="flex justify-between text-sm text-gray-500">
                   <div className="flex items-center gap-1.5">
                     <Users className="h-4 w-4 text-gray-400" />
-                    <span>{project.project_members?.length || 0} members</span>
+                    <span>{project.project_members?.length || 0} メンバー</span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <CalendarDays className="h-4 w-4 text-gray-400" />
-                    <span>{new Date(project.created_at).toLocaleDateString()}</span>
+                    <span>{new Date(project.created_at).toLocaleDateString('ja-JP')}</span>
                   </div>
                 </div>
               </div>

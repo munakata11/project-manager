@@ -10,12 +10,12 @@ import {
 } from "lucide-react";
 
 const menuItems = [
-  { icon: LayoutDashboard, label: "Dashboard", path: "/" },
-  { icon: FolderKanban, label: "Projects", path: "/projects" },
-  { icon: Calendar, label: "Calendar", path: "/calendar" },
-  { icon: MessageSquare, label: "Messages", path: "/messages" },
-  { icon: Users, label: "Team", path: "/team" },
-  { icon: Settings, label: "Settings", path: "/settings" },
+  { icon: LayoutDashboard, label: "ダッシュボード", path: "/" },
+  { icon: FolderKanban, label: "プロジェクト", path: "/projects" },
+  { icon: Calendar, label: "カレンダー", path: "/calendar" },
+  { icon: MessageSquare, label: "メッセージ", path: "/messages" },
+  { icon: Users, label: "チーム", path: "/team" },
+  { icon: Settings, label: "設定", path: "/settings" },
 ];
 
 export function Sidebar() {
@@ -24,7 +24,7 @@ export function Sidebar() {
   return (
     <div className="hidden lg:flex h-screen w-64 flex-col fixed left-0 top-0 border-r bg-white">
       <div className="p-6">
-        <h2 className="text-xl font-semibold text-purple-600">Workflow</h2>
+        <h2 className="text-xl font-semibold text-purple-600">ワークフロー</h2>
       </div>
       <nav className="flex-1 space-y-1 px-4">
         {menuItems.map((item) => {
