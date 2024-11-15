@@ -47,12 +47,11 @@ export function FileList({ files, projectId, onRefetch }: FileListProps) {
 
   const handleOpen = async (filePath: string) => {
     try {
-      const { data: { publicUrl }, error } = await supabase.storage
+      const { data } = await supabase.storage
         .from("project-files")
         .getPublicUrl(filePath);
 
-      if (error) throw error;
-      window.open(publicUrl, '_blank');
+      window.open(data.publicUrl, '_blank');
     } catch (error) {
       toast({
         title: "エラー",
