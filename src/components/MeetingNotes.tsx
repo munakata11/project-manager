@@ -11,6 +11,17 @@ interface MeetingNotesProps {
   projectId: string;
 }
 
+interface Note {
+  id: string;
+  title: string;
+  content: string | null;
+  created_at: string;
+  created_by: {
+    full_name: string | null;
+    avatar_url: string | null;
+  } | null;
+}
+
 export function MeetingNotes({ projectId }: MeetingNotesProps) {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const { toast } = useToast();
@@ -22,7 +33,7 @@ export function MeetingNotes({ projectId }: MeetingNotesProps) {
         .from("meeting_notes")
         .select(`
           *,
-          created_by (
+          created_by:profiles (
             full_name,
             avatar_url
           )
@@ -31,7 +42,7 @@ export function MeetingNotes({ projectId }: MeetingNotesProps) {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return data;
+      return data as Note[];
     },
   });
 
