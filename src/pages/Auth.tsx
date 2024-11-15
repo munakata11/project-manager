@@ -28,9 +28,6 @@ const AuthPage = () => {
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
           <h2 className="text-3xl font-bold text-purple-600">Project Manager サインイン</h2>
-          <p className="mt-2 text-sm text-gray-600">
-            プロジェクト管理をシンプルに
-          </p>
         </div>
         <div className="mt-8 bg-white py-8 px-4 shadow-lg rounded-lg sm:px-10">
           <Auth
