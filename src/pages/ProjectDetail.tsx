@@ -8,7 +8,9 @@ import { CalendarDays, List, Users } from "lucide-react";
 import { CreateTaskDialog } from "@/components/CreateTaskDialog";
 import { ProjectMembersDialog } from "@/components/ProjectMembersDialog";
 import { TaskCard } from "@/components/TaskCard";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { MeetingNotes } from "@/components/MeetingNotes";
+import { ProjectFiles } from "@/components/ProjectFiles";
 
 const ProjectDetail = () => {
   const { projectId } = useParams();
@@ -40,23 +42,6 @@ const ProjectDetail = () => {
         .single();
 
       if (error) throw error;
-
-      if (data.tasks && data.tasks.length > 0) {
-        const completedTasks = data.tasks.filter(
-          (task) => task.status === "完了"
-        ).length;
-        const progress = Math.round(
-          (completedTasks / data.tasks.length) * 100
-        );
-        
-        await supabase
-          .from("projects")
-          .update({ progress })
-          .eq("id", projectId);
-        
-        data.progress = progress;
-      }
-
       return data;
     },
   });
@@ -122,27 +107,45 @@ const ProjectDetail = () => {
         </CardContent>
       </Card>
 
-      <Card className="w-full bg-white border-gray-100">
-        <CardHeader className="flex flex-row items-center justify-between pb-3">
-          <CardTitle className="text-lg font-semibold text-gray-900">
-            タスク
-          </CardTitle>
-          <div className="flex gap-2">
-            <ProjectMembersDialog
-              projectId={project.id}
-              currentMembers={project.project_members || []}
-            />
-            <CreateTaskDialog projectId={project.id} />
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {project.tasks?.map((task) => (
-              <TaskCard key={task.id} task={task} projectId={project.id} />
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      <Tabs defaultValue="tasks" className="w-full">
+        <TabsList>
+          <TabsTrigger value="tasks">タスク</TabsTrigger>
+          <TabsTrigger value="notes">議事録・電話メモ</TabsTrigger>
+          <TabsTrigger value="files">ファイル</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="tasks">
+          <Card className="w-full bg-white border-gray-100">
+            <CardHeader className="flex flex-row items-center justify-between pb-3">
+              <CardTitle className="text-lg font-semibold text-gray-900">
+                タスク
+              </CardTitle>
+              <div className="flex gap-2">
+                <ProjectMembersDialog
+                  projectId={project.id}
+                  currentMembers={project.project_members || []}
+                />
+                <CreateTaskDialog projectId={project.id} />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {project.tasks?.map((task) => (
+                  <TaskCard key={task.id} task={task} projectId={project.id} />
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="notes">
+          <MeetingNotes projectId={project.id} />
+        </TabsContent>
+
+        <TabsContent value="files">
+          <ProjectFiles projectId={project.id} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
