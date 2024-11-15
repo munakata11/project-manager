@@ -25,7 +25,7 @@ export function Sidebar() {
   return (
     <div className="hidden lg:flex h-screen w-64 flex-col fixed left-0 top-0 border-r bg-white">
       <div className="p-6">
-        <h2 className="text-xl font-semibold text-purple-600">ワークフロー</h2>
+        <h2 className="text-xl font-semibold text-purple-600">Project Manager</h2>
       </div>
       <nav className="flex-1 space-y-1 px-4">
         <Link
