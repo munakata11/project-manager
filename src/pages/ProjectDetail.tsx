@@ -12,10 +12,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MeetingNotes } from "@/components/MeetingNotes";
 import { ProjectFiles } from "@/components/ProjectFiles";
 import { CreateProcessDialog } from "@/components/CreateProcessDialog";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useToast } from "@/components/ui/use-toast";
 
 const ProjectDetail = () => {
   const { projectId } = useParams();
   const { session } = useAuth();
+  const { toast } = useToast();
 
   const { data: project, isLoading } = useQuery({
     queryKey: ["project", projectId],
@@ -35,6 +38,7 @@ const ProjectDetail = () => {
             id,
             title,
             description,
+            status,
             tasks (
               *,
               assignee:profiles (
@@ -59,6 +63,27 @@ const ProjectDetail = () => {
     },
   });
 
+  const handleProcessStatusChange = async (processId: string, newStatus: string) => {
+    try {
+      const { error } = await supabase
+        .from("processes")
+        .update({ status: newStatus })
+        .eq("id", processId);
+
+      if (error) throw error;
+
+      toast({
+        title: "工程のステータスを更新しました",
+      });
+    } catch (error) {
+      toast({
+        title: "エラー",
+        description: "工程のステータスの更新に失敗しました。",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -81,6 +106,8 @@ const ProjectDetail = () => {
       </div>
     );
   }
+
+  const otherTasks = project.tasks?.filter(task => !task.process_id) || [];
 
   return (
     <div className="space-y-6">
@@ -146,7 +173,15 @@ const ProjectDetail = () => {
               <div className="space-y-6">
                 {project.processes?.map((process) => (
                   <div key={process.id} className="space-y-3">
-                    <h3 className="text-lg font-medium text-gray-900">{process.title}</h3>
+                    <div className="flex items-center gap-3">
+                      <Checkbox
+                        checked={process.status === "完了"}
+                        onCheckedChange={(checked) => {
+                          handleProcessStatusChange(process.id, checked ? "完了" : "進行中");
+                        }}
+                      />
+                      <h3 className="text-lg font-medium text-gray-900">{process.title}</h3>
+                    </div>
                     {process.description && (
                       <p className="text-sm text-gray-500">{process.description}</p>
                     )}
@@ -157,12 +192,14 @@ const ProjectDetail = () => {
                     </div>
                   </div>
                 ))}
-                <div className="space-y-3">
-                  <h3 className="text-lg font-medium text-gray-900">その他のタスク</h3>
-                  {project.tasks?.filter(task => !task.process_id).map((task) => (
-                    <TaskCard key={task.id} task={task} projectId={project.id} />
-                  ))}
-                </div>
+                {otherTasks.length > 0 && (
+                  <div className="space-y-3">
+                    <h3 className="text-lg font-medium text-gray-900">その他のタスク</h3>
+                    {otherTasks.map((task) => (
+                      <TaskCard key={task.id} task={task} projectId={project.id} />
+                    ))}
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
