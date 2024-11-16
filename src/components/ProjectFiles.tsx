@@ -105,7 +105,7 @@ export function ProjectFiles({ projectId }: ProjectFilesProps) {
     <Card className="w-full bg-white border-gray-100">
       <CardHeader className="pb-3">
         <CardTitle className="text-lg font-semibold text-gray-900">
-          ファイル・URL
+          参照
         </CardTitle>
       </CardHeader>
       <CardContent>

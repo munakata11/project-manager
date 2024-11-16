@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { ExternalLink, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 
 interface URLListProps {
   urls: {
@@ -73,13 +73,6 @@ export function URLList({ urls, onRefetch }: URLListProps) {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => window.open(url.url, '_blank')}
-                >
-                  <ExternalLink className="h-4 w-4" />
-                </Button>
                 <Button
                   variant="ghost"
                   size="sm"
