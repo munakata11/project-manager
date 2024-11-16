@@ -10,6 +10,7 @@ interface ProjectTasksProps {
     id: string;
     processes: any[];
     tasks: any[];
+    project_members: any[];  // 追加：project_membersプロパティを型定義に追加
   };
 }
 
