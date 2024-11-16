@@ -2,24 +2,16 @@ import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/AuthProvider";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { CalendarDays, List, Users } from "lucide-react";
-import { CreateTaskDialog } from "@/components/CreateTaskDialog";
-import { ProjectMembersDialog } from "@/components/ProjectMembersDialog";
-import { TaskCard } from "@/components/TaskCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MeetingNotes } from "@/components/MeetingNotes";
 import { ProjectFiles } from "@/components/ProjectFiles";
-import { CreateProcessDialog } from "@/components/CreateProcessDialog";
-import { useToast } from "@/components/ui/use-toast";
-import { ProcessCard } from "@/components/ProcessCard";
+import { ProjectOverview } from "@/components/ProjectOverview";
+import { ProjectTasks } from "@/components/ProjectTasks";
 
 const ProjectDetail = () => {
   const { projectId } = useParams();
   const { session } = useAuth();
-  const { toast } = useToast();
-
+  
   const { data: project, isLoading } = useQuery({
     queryKey: ["project", projectId],
     queryFn: async () => {
@@ -63,27 +55,6 @@ const ProjectDetail = () => {
     },
   });
 
-  const handleProcessStatusChange = async (processId: string, newStatus: string) => {
-    try {
-      const { error } = await supabase
-        .from("processes")
-        .update({ status: newStatus })
-        .eq("id", processId);
-
-      if (error) throw error;
-
-      toast({
-        title: "工程のステータスを更新しました",
-      });
-    } catch (error) {
-      toast({
-        title: "エラー",
-        description: "工程のステータスの更新に失敗しました。",
-        variant: "destructive",
-      });
-    }
-  };
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -107,8 +78,6 @@ const ProjectDetail = () => {
     );
   }
 
-  const otherTasks = project.tasks?.filter(task => !task.process_id) || [];
-
   return (
     <div className="space-y-6">
       <div className="mb-8">
@@ -116,86 +85,24 @@ const ProjectDetail = () => {
         <p className="mt-1 text-gray-500">{project.description}</p>
       </div>
 
-      <Card className="w-full bg-white border-gray-100">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg font-semibold text-gray-900">
-            概要
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div>
-              <div className="flex justify-between text-sm text-gray-500 mb-1.5">
-                <span>進捗</span>
-                <span>{project.progress}%</span>
-              </div>
-              <Progress value={project.progress} className="h-2 bg-gray-100" />
-            </div>
-
-            <div className="flex items-center gap-2 text-sm text-gray-500">
-              <CalendarDays className="h-4 w-4 text-gray-400" />
-              <span>
-                作成日: {new Date(project.created_at).toLocaleDateString("ja-JP")}
-              </span>
-            </div>
-
-            <div className="flex items-center gap-2 text-sm text-gray-500">
-              <Users className="h-4 w-4 text-gray-400" />
-              <span>{project.project_members?.length || 0} メンバー</span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <ProjectOverview project={project} />
 
       <Tabs defaultValue="tasks" className="w-full">
         <TabsList>
           <TabsTrigger value="tasks">タスク</TabsTrigger>
           <TabsTrigger value="notes">議事録・電話メモ</TabsTrigger>
-          <TabsTrigger value="files">ファイル</TabsTrigger>
+          <TabsTrigger value="reference">参照</TabsTrigger>
         </TabsList>
 
         <TabsContent value="tasks">
-          <Card className="w-full bg-white border-gray-100">
-            <CardHeader className="flex flex-row items-center justify-between pb-3">
-              <CardTitle className="text-lg font-semibold text-gray-900">
-                タスク
-              </CardTitle>
-              <div className="flex gap-2">
-                <ProjectMembersDialog
-                  projectId={project.id}
-                  currentMembers={project.project_members || []}
-                />
-                <CreateProcessDialog projectId={project.id} />
-                <CreateTaskDialog projectId={project.id} />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                {project.processes?.map((process) => (
-                  <ProcessCard
-                    key={process.id}
-                    process={process}
-                    projectId={project.id}
-                  />
-                ))}
-                {otherTasks.length > 0 && (
-                  <div className="space-y-3">
-                    <h3 className="text-lg font-medium text-gray-900">その他のタスク</h3>
-                    {otherTasks.map((task) => (
-                      <TaskCard key={task.id} task={task} projectId={project.id} />
-                    ))}
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+          <ProjectTasks project={project} />
         </TabsContent>
 
         <TabsContent value="notes">
           <MeetingNotes projectId={project.id} />
         </TabsContent>
 
-        <TabsContent value="files">
+        <TabsContent value="reference">
           <ProjectFiles projectId={project.id} />
         </TabsContent>
       </Tabs>
