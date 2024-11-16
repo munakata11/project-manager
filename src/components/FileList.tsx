@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Download, ExternalLink, Trash2 } from "lucide-react";
+import { Download, Trash2 } from "lucide-react";
 
 interface FileListProps {
   files: {
@@ -116,13 +116,6 @@ export function FileList({ files, projectId, onRefetch }: FileListProps) {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleOpen(file.file_path)}
-                >
-                  <ExternalLink className="h-4 w-4" />
-                </Button>
                 <Button
                   variant="ghost"
                   size="sm"
