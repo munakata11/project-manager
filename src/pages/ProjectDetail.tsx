@@ -11,6 +11,7 @@ import { TaskCard } from "@/components/TaskCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MeetingNotes } from "@/components/MeetingNotes";
 import { ProjectFiles } from "@/components/ProjectFiles";
+import { CreateProcessDialog } from "@/components/CreateProcessDialog";
 
 const ProjectDetail = () => {
   const { projectId } = useParams();
@@ -28,6 +29,18 @@ const ProjectDetail = () => {
             profiles (
               full_name,
               avatar_url
+            )
+          ),
+          processes (
+            id,
+            title,
+            description,
+            tasks (
+              *,
+              assignee:profiles (
+                full_name,
+                avatar_url
+              )
             )
           ),
           tasks (
@@ -125,14 +138,31 @@ const ProjectDetail = () => {
                   projectId={project.id}
                   currentMembers={project.project_members || []}
                 />
+                <CreateProcessDialog projectId={project.id} />
                 <CreateTaskDialog projectId={project.id} />
               </div>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
-                {project.tasks?.map((task) => (
-                  <TaskCard key={task.id} task={task} projectId={project.id} />
+              <div className="space-y-6">
+                {project.processes?.map((process) => (
+                  <div key={process.id} className="space-y-3">
+                    <h3 className="text-lg font-medium text-gray-900">{process.title}</h3>
+                    {process.description && (
+                      <p className="text-sm text-gray-500">{process.description}</p>
+                    )}
+                    <div className="space-y-3">
+                      {process.tasks?.map((task) => (
+                        <TaskCard key={task.id} task={task} projectId={project.id} />
+                      ))}
+                    </div>
+                  </div>
                 ))}
+                <div className="space-y-3">
+                  <h3 className="text-lg font-medium text-gray-900">その他のタスク</h3>
+                  {project.tasks?.filter(task => !task.process_id).map((task) => (
+                    <TaskCard key={task.id} task={task} projectId={project.id} />
+                  ))}
+                </div>
               </div>
             </CardContent>
           </Card>

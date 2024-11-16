@@ -54,6 +54,41 @@ export type Database = {
           },
         ]
       }
+      processes: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          order_index: number
+          project_id: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          order_index?: number
+          project_id: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          order_index?: number
+          project_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "processes_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -249,6 +284,7 @@ export type Database = {
           description: string | null
           due_date: string | null
           id: string
+          process_id: string | null
           project_id: string
           status: string | null
           title: string
@@ -259,6 +295,7 @@ export type Database = {
           description?: string | null
           due_date?: string | null
           id?: string
+          process_id?: string | null
           project_id: string
           status?: string | null
           title: string
@@ -269,6 +306,7 @@ export type Database = {
           description?: string | null
           due_date?: string | null
           id?: string
+          process_id?: string | null
           project_id?: string
           status?: string | null
           title?: string
@@ -279,6 +317,13 @@ export type Database = {
             columns: ["assignee_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_process_id_fkey"
+            columns: ["process_id"]
+            isOneToOne: false
+            referencedRelation: "processes"
             referencedColumns: ["id"]
           },
           {

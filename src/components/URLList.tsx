@@ -53,7 +53,14 @@ export function URLList({ urls, onRefetch }: URLListProps) {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div className="flex-1">
-                <h3 className="font-medium text-gray-900">{url.title}</h3>
+                <a
+                  href={url.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium text-gray-900 hover:text-purple-600 transition-colors"
+                >
+                  <h3>{url.title}</h3>
+                </a>
                 {url.description && (
                   <p className="mt-1 text-sm text-gray-600">{url.description}</p>
                 )}

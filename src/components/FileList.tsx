@@ -99,7 +99,12 @@ export function FileList({ files, projectId, onRefetch }: FileListProps) {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div className="flex-1">
-                <h3 className="font-medium text-gray-900">{file.filename}</h3>
+                <button
+                  onClick={() => handleOpen(file.file_path)}
+                  className="font-medium text-gray-900 hover:text-purple-600 transition-colors"
+                >
+                  <h3>{file.filename}</h3>
+                </button>
                 <div className="mt-1 text-sm text-gray-500">
                   <span>
                     {new Date(file.created_at).toLocaleDateString("ja-JP")}
