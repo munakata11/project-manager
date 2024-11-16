@@ -1,9 +1,11 @@
+import { useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { TaskCard } from "./TaskCard";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface ProcessCardProps {
   process: {
@@ -14,11 +16,12 @@ interface ProcessCardProps {
     tasks: any[];
   };
   projectId: string;
-  onStatusChange: (processId: string, newStatus: string) => Promise<void>;
 }
 
-export const ProcessCard = ({ process, projectId, onStatusChange }: ProcessCardProps) => {
+export const ProcessCard = ({ process, projectId }: ProcessCardProps) => {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const handleDelete = async () => {
     if (!window.confirm("この工程を削除してもよろしいですか？")) return;
@@ -35,8 +38,7 @@ export const ProcessCard = ({ process, projectId, onStatusChange }: ProcessCardP
         title: "工程を削除しました",
       });
 
-      // Refresh the page to update the UI
-      window.location.reload();
+      queryClient.invalidateQueries({ queryKey: ["project", projectId] });
     } catch (error) {
       toast({
         title: "エラー",
@@ -46,15 +48,36 @@ export const ProcessCard = ({ process, projectId, onStatusChange }: ProcessCardP
     }
   };
 
+  const handleStatusChange = async (checked: boolean) => {
+    try {
+      setIsUpdating(true);
+      const { error } = await supabase
+        .from("processes")
+        .update({ status: checked ? "完了" : "進行中" })
+        .eq("id", process.id);
+
+      if (error) throw error;
+
+      queryClient.invalidateQueries({ queryKey: ["project", projectId] });
+    } catch (error) {
+      toast({
+        title: "エラー",
+        description: "ステータスの更新に失敗しました。",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Checkbox
             checked={process.status === "完了"}
-            onCheckedChange={(checked) => {
-              onStatusChange(process.id, checked ? "完了" : "進行中");
-            }}
+            onCheckedChange={handleStatusChange}
+            disabled={isUpdating}
           />
           <h3 className="text-lg font-medium text-gray-900">{process.title}</h3>
         </div>

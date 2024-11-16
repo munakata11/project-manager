@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { CreateNoteDialog } from "./CreateNoteDialog";
+import { useToast } from "@/components/ui/use-toast";
 
 interface MeetingNotesProps {
   projectId: string;
@@ -24,6 +25,8 @@ interface Note {
 export function MeetingNotes({ projectId }: MeetingNotesProps) {
   const [isCreateMeetingDialogOpen, setIsCreateMeetingDialogOpen] = useState(false);
   const [isCreateCallDialogOpen, setIsCreateCallDialogOpen] = useState(false);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: notes, isLoading } = useQuery({
     queryKey: ["meeting-notes", projectId],
@@ -44,6 +47,31 @@ export function MeetingNotes({ projectId }: MeetingNotesProps) {
     },
   });
 
+  const handleDelete = async (noteId: string) => {
+    if (!window.confirm("このメモを削除してもよろしいですか？")) return;
+
+    try {
+      const { error } = await supabase
+        .from("meeting_notes")
+        .delete()
+        .eq("id", noteId);
+
+      if (error) throw error;
+
+      toast({
+        title: "メモを削除しました",
+      });
+
+      queryClient.invalidateQueries({ queryKey: ["meeting-notes", projectId] });
+    } catch (error) {
+      toast({
+        title: "エラー",
+        description: "メモの削除に失敗しました。",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -62,9 +90,18 @@ export function MeetingNotes({ projectId }: MeetingNotesProps) {
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-2">
               <h3 className="font-medium text-gray-900">{note.title}</h3>
-              <span className="text-sm text-gray-500">
-                {new Date(note.created_at).toLocaleDateString("ja-JP")}
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-500">
+                  {new Date(note.created_at).toLocaleDateString("ja-JP")}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleDelete(note.id)}
+                >
+                  <Trash2 className="h-4 w-4 text-red-500" />
+                </Button>
+              </div>
             </div>
             <p className="text-gray-600 whitespace-pre-wrap">
               {note.content}

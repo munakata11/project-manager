@@ -62,10 +62,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
             {projects?.map((project) => (
               <Link
                 key={project.id}
-                to={`/projects/${project.id}`}
+                to={`/project/${project.id}`}
                 className={cn(
                   "block px-3 py-2 rounded-lg text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors text-sm",
-                  location.pathname === `/projects/${project.id}` &&
+                  location.pathname === `/project/${project.id}` &&
                     "bg-purple-50 text-purple-600 font-medium"
                 )}
               >
