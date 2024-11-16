@@ -176,7 +176,6 @@ const ProjectDetail = () => {
                     key={process.id}
                     process={process}
                     projectId={project.id}
-                    onStatusChange={handleProcessStatusChange}
                   />
                 ))}
                 {otherTasks.length > 0 && (
