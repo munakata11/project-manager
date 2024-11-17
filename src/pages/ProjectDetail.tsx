@@ -89,7 +89,7 @@ const ProjectDetail = () => {
 
       <Tabs defaultValue="tasks" className="w-full">
         <TabsList>
-          <TabsTrigger value="tasks">タスク</TabsTrigger>
+          <TabsTrigger value="tasks">工程・タスク</TabsTrigger>
           <TabsTrigger value="notes">議事録・電話メモ</TabsTrigger>
           <TabsTrigger value="reference">参照</TabsTrigger>
         </TabsList>
