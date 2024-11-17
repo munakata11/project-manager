@@ -52,21 +52,25 @@ export const ProcessCard = ({ process, projectId }: ProcessCardProps) => {
     try {
       setIsUpdating(true);
       const newStatus = checked ? "完了" : "進行中";
-      const newPercentage = checked ? 100 : process.percentage;
+      const newPercentage = checked ? 100 : 0;
 
       const { error } = await supabase
         .from("processes")
         .update({
           status: newStatus,
           percentage: newPercentage,
-          order_index: process.order_index
         })
         .eq("id", process.id);
 
       if (error) throw error;
 
+      toast({
+        title: `ステータスを${newStatus}に更新しました`,
+      });
+
       queryClient.invalidateQueries({ queryKey: ["project", projectId] });
     } catch (error) {
+      console.error("Error updating status:", error);
       toast({
         title: "エラー",
         description: "ステータスの更新に失敗しました。",
@@ -82,16 +86,29 @@ export const ProcessCard = ({ process, projectId }: ProcessCardProps) => {
       setIsUpdating(true);
       const newStatus = value === 100 ? "完了" : "進行中";
 
-      const { error } = await supabase
+      console.log("Updating process with:", {
+        percentage: value,
+        status: newStatus,
+        processId: process.id,
+      });
+
+      const { data, error } = await supabase
         .from("processes")
         .update({
           percentage: value,
           status: newStatus,
-          order_index: process.order_index
         })
-        .eq("id", process.id);
+        .eq("id", process.id)
+        .select();
 
       if (error) throw error;
+
+      console.log("Update response:", data);
+
+      toast({
+        title: "進捗率を更新しました",
+        description: `${value}%に更新しました`,
+      });
 
       queryClient.invalidateQueries({ queryKey: ["project", projectId] });
     } catch (error) {
