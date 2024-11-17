@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import { Trash2, Edit2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -125,18 +126,24 @@ export const ProcessCard = ({ process, projectId }: ProcessCardProps) => {
             onCheckedChange={handleStatusChange}
             disabled={isUpdating}
           />
-          <div>
+          <div className="flex-1">
             <h3 className="text-lg font-medium text-gray-900">{process.title}</h3>
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-500">進捗割合: {process.percentage || 0}%</span>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-6 px-2"
-                onClick={() => setIsEditOpen(true)}
-              >
-                <Edit2 className="h-3 w-3 text-gray-500" />
-              </Button>
+            <div className="mt-2 space-y-2">
+              <div className="flex justify-between text-sm text-gray-500">
+                <span>進捗</span>
+                <div className="flex items-center gap-2">
+                  <span>{process.percentage || 0}%</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 px-2"
+                    onClick={() => setIsEditOpen(true)}
+                  >
+                    <Edit2 className="h-3 w-3 text-gray-500" />
+                  </Button>
+                </div>
+              </div>
+              <Progress value={process.percentage || 0} className="h-2 bg-gray-100" />
             </div>
           </div>
         </div>
