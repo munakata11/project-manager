@@ -28,7 +28,10 @@ export const ProcessProgressInput = ({ percentage, onChange }: ProcessProgressIn
         min={0}
         max={100}
         value={percentage}
-        onChange={(e) => handleChange(parseInt(e.target.value, 10) || 0)}
+        onChange={(e) => {
+          const value = e.target.value === '' ? 0 : parseInt(e.target.value, 10);
+          handleChange(value);
+        }}
         className="w-20"
       />
       <Button

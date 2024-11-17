@@ -51,11 +51,14 @@ export const ProcessCard = ({ process, projectId }: ProcessCardProps) => {
   const handleStatusChange = async (checked: boolean) => {
     try {
       setIsUpdating(true);
+      const newStatus = checked ? "完了" : "進行中";
+      const newPercentage = checked ? 100 : process.percentage;
+
       const { error } = await supabase
         .from("processes")
-        .update({ 
-          status: checked ? "完了" : "進行中",
-          percentage: process.percentage,
+        .update({
+          status: newStatus,
+          percentage: newPercentage,
           order_index: process.order_index
         })
         .eq("id", process.id);
@@ -77,11 +80,13 @@ export const ProcessCard = ({ process, projectId }: ProcessCardProps) => {
   const handlePercentageChange = async (value: number) => {
     try {
       setIsUpdating(true);
+      const newStatus = value === 100 ? "完了" : "進行中";
+
       const { error } = await supabase
         .from("processes")
-        .update({ 
+        .update({
           percentage: value,
-          status: value === 100 ? "完了" : "進行中",
+          status: newStatus,
           order_index: process.order_index
         })
         .eq("id", process.id);
@@ -90,6 +95,7 @@ export const ProcessCard = ({ process, projectId }: ProcessCardProps) => {
 
       queryClient.invalidateQueries({ queryKey: ["project", projectId] });
     } catch (error) {
+      console.error("Error updating percentage:", error);
       toast({
         title: "エラー",
         description: "進捗率の更新に失敗しました。",
