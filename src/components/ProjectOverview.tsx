@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { CalendarDays, Users } from "lucide-react";
+import { CalendarDays } from "lucide-react";
 
 interface ProjectOverviewProps {
   project: {
@@ -8,7 +8,6 @@ interface ProjectOverviewProps {
     description: string;
     progress: number;
     created_at: string;
-    project_members: any[];
   };
 }
 
@@ -35,11 +34,6 @@ export function ProjectOverview({ project }: ProjectOverviewProps) {
             <span>
               作成日: {new Date(project.created_at).toLocaleDateString("ja-JP")}
             </span>
-          </div>
-
-          <div className="flex items-center gap-2 text-sm text-gray-500">
-            <Users className="h-4 w-4 text-gray-400" />
-            <span>{project.project_members?.length || 0} メンバー</span>
           </div>
         </div>
       </CardContent>

@@ -21,7 +21,8 @@ interface URLListProps {
 export function URLList({ urls, onRefetch }: URLListProps) {
   const { toast } = useToast();
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
     if (!window.confirm("このURLを削除してもよろしいですか？")) return;
 
     try {
@@ -49,18 +50,15 @@ export function URLList({ urls, onRefetch }: URLListProps) {
   return (
     <div className="space-y-4">
       {urls?.map((url) => (
-        <Card key={url.id} className="border-gray-100">
+        <Card 
+          key={url.id} 
+          className="border-gray-100 cursor-pointer hover:border-purple-200 transition-colors"
+          onClick={() => window.open(url.url, '_blank')}
+        >
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div className="flex-1">
-                <a
-                  href={url.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-medium text-gray-900 hover:text-purple-600 transition-colors"
-                >
-                  <h3>{url.title}</h3>
-                </a>
+                <h3 className="font-medium text-gray-900">{url.title}</h3>
                 {url.description && (
                   <p className="mt-1 text-sm text-gray-600">{url.description}</p>
                 )}
@@ -76,7 +74,7 @@ export function URLList({ urls, onRefetch }: URLListProps) {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => handleDelete(url.id)}
+                  onClick={(e) => handleDelete(e, url.id)}
                 >
                   <Trash2 className="h-4 w-4 text-red-500" />
                 </Button>

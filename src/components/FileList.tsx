@@ -22,7 +22,8 @@ interface FileListProps {
 export function FileList({ files, projectId, onRefetch }: FileListProps) {
   const { toast } = useToast();
 
-  const handleDownload = async (filePath: string, filename: string) => {
+  const handleDownload = async (e: React.MouseEvent, filePath: string, filename: string) => {
+    e.stopPropagation();
     try {
       const { data, error } = await supabase.storage
         .from("project-files")
@@ -61,7 +62,8 @@ export function FileList({ files, projectId, onRefetch }: FileListProps) {
     }
   };
 
-  const handleDelete = async (id: string, filePath: string) => {
+  const handleDelete = async (e: React.MouseEvent, id: string, filePath: string) => {
+    e.stopPropagation();
     if (!window.confirm("このファイルを削除してもよろしいですか？")) return;
 
     try {
@@ -95,16 +97,15 @@ export function FileList({ files, projectId, onRefetch }: FileListProps) {
   return (
     <div className="space-y-4">
       {files?.map((file) => (
-        <Card key={file.id} className="border-gray-100">
+        <Card 
+          key={file.id} 
+          className="border-gray-100 cursor-pointer hover:border-purple-200 transition-colors"
+          onClick={() => handleOpen(file.file_path)}
+        >
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div className="flex-1">
-                <button
-                  onClick={() => handleOpen(file.file_path)}
-                  className="font-medium text-gray-900 hover:text-purple-600 transition-colors"
-                >
-                  <h3>{file.filename}</h3>
-                </button>
+                <h3 className="font-medium text-gray-900">{file.filename}</h3>
                 <div className="mt-1 text-sm text-gray-500">
                   <span>
                     {new Date(file.created_at).toLocaleDateString("ja-JP")}
@@ -119,14 +120,14 @@ export function FileList({ files, projectId, onRefetch }: FileListProps) {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => handleDownload(file.file_path, file.filename)}
+                  onClick={(e) => handleDownload(e, file.file_path, file.filename)}
                 >
                   <Download className="h-4 w-4" />
                 </Button>
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => handleDelete(file.id, file.file_path)}
+                  onClick={(e) => handleDelete(e, file.id, file.file_path)}
                 >
                   <Trash2 className="h-4 w-4 text-red-500" />
                 </Button>
