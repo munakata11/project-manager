@@ -60,6 +60,7 @@ export type Database = {
           description: string | null
           id: string
           order_index: number
+          percentage: number | null
           project_id: string
           status: string | null
           title: string
@@ -69,6 +70,7 @@ export type Database = {
           description?: string | null
           id?: string
           order_index?: number
+          percentage?: number | null
           project_id: string
           status?: string | null
           title: string
@@ -78,6 +80,7 @@ export type Database = {
           description?: string | null
           id?: string
           order_index?: number
+          percentage?: number | null
           project_id?: string
           status?: string | null
           title?: string

@@ -13,6 +13,7 @@ interface ProcessCardProps {
     title: string;
     description: string | null;
     status: string | null;
+    percentage: number;
     tasks: any[];
   };
   projectId: string;
@@ -58,6 +59,23 @@ export const ProcessCard = ({ process, projectId }: ProcessCardProps) => {
 
       if (error) throw error;
 
+      // Update project progress
+      const { data: processes } = await supabase
+        .from("processes")
+        .select("percentage, status")
+        .eq("project_id", projectId);
+
+      if (processes) {
+        const totalProgress = processes.reduce((acc, curr) => {
+          return acc + (curr.status === "完了" ? curr.percentage : 0);
+        }, 0);
+
+        await supabase
+          .from("projects")
+          .update({ progress: totalProgress })
+          .eq("id", projectId);
+      }
+
       queryClient.invalidateQueries({ queryKey: ["project", projectId] });
     } catch (error) {
       toast({
@@ -79,7 +97,10 @@ export const ProcessCard = ({ process, projectId }: ProcessCardProps) => {
             onCheckedChange={handleStatusChange}
             disabled={isUpdating}
           />
-          <h3 className="text-lg font-medium text-gray-900">{process.title}</h3>
+          <div>
+            <h3 className="text-lg font-medium text-gray-900">{process.title}</h3>
+            <span className="text-sm text-gray-500">進捗割合: {process.percentage}%</span>
+          </div>
         </div>
         <Button
           variant="ghost"

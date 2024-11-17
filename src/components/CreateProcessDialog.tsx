@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Plus } from "lucide-react";
@@ -13,6 +14,7 @@ import { useQueryClient } from "@tanstack/react-query";
 type FormData = {
   title: string;
   description: string;
+  percentage: number;
 };
 
 interface CreateProcessDialogProps {
@@ -23,7 +25,11 @@ export const CreateProcessDialog = ({ projectId }: CreateProcessDialogProps) => 
   const [open, setOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const form = useForm<FormData>();
+  const form = useForm<FormData>({
+    defaultValues: {
+      percentage: 0,
+    },
+  });
 
   const onSubmit = async (data: FormData) => {
     try {
@@ -33,6 +39,7 @@ export const CreateProcessDialog = ({ projectId }: CreateProcessDialogProps) => 
           title: data.title,
           description: data.description,
           project_id: projectId,
+          percentage: data.percentage,
         });
 
       if (error) throw error;
@@ -88,6 +95,25 @@ export const CreateProcessDialog = ({ projectId }: CreateProcessDialogProps) => 
                   <FormLabel className="text-sm font-medium text-gray-700">説明</FormLabel>
                   <FormControl>
                     <Textarea placeholder="工程の説明を入力" className="border-gray-200" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="percentage"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-sm font-medium text-gray-700">進捗割合 ({field.value}%)</FormLabel>
+                  <FormControl>
+                    <Slider
+                      min={0}
+                      max={100}
+                      step={1}
+                      value={[field.value]}
+                      onValueChange={(value) => field.onChange(value[0])}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
