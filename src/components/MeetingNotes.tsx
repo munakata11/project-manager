@@ -162,6 +162,7 @@ export function MeetingNotes({ projectId }: MeetingNotesProps) {
         onOpenChange={setIsCreateMeetingDialogOpen}
         noteType="meeting"
         title="議事録の作成"
+        noteCount={meetingNotes.length}
       />
       <CreateNoteDialog
         projectId={projectId}
@@ -169,6 +170,7 @@ export function MeetingNotes({ projectId }: MeetingNotesProps) {
         onOpenChange={setIsCreateCallDialogOpen}
         noteType="call"
         title="電話メモの作成"
+        noteCount={callNotes.length}
       />
     </div>
   );

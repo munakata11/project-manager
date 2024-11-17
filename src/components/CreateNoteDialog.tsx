@@ -12,6 +12,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "./AuthProvider";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 interface CreateNoteDialogProps {
   projectId: string;
@@ -19,6 +21,7 @@ interface CreateNoteDialogProps {
   onOpenChange: (open: boolean) => void;
   noteType: "meeting" | "call";
   title: string;
+  noteCount: number;
 }
 
 export function CreateNoteDialog({
@@ -27,23 +30,65 @@ export function CreateNoteDialog({
   onOpenChange,
   noteType,
   title,
+  noteCount,
 }: CreateNoteDialogProps) {
   const [noteTitle, setNoteTitle] = useState("");
   const [content, setContent] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [useAITitle, setUseAITitle] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { session } = useAuth();
 
+  const generateTitle = async (content: string) => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-title`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          },
+          body: JSON.stringify({ content }),
+        }
+      );
+
+      if (!response.ok) throw new Error("Failed to generate title");
+      const data = await response.json();
+      return data.title;
+    } catch (error) {
+      console.error("Error generating title:", error);
+      throw error;
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!noteTitle || !content) return;
+    if (!content || (!noteTitle && !useAITitle)) return;
 
     try {
       setIsLoading(true);
+      let finalTitle = noteTitle;
+
+      if (useAITitle) {
+        try {
+          finalTitle = await generateTitle(content);
+        } catch (error) {
+          toast({
+            title: "エラー",
+            description: "タイトルの生成に失敗しました。",
+            variant: "destructive",
+          });
+          return;
+        }
+      }
+
+      const formattedTitle = `${noteType === "meeting" ? "議事録" : "電話メモ"}#${noteCount + 1} ${finalTitle}`;
+
       const { error } = await supabase.from("meeting_notes").insert({
         project_id: projectId,
-        title: noteTitle,
+        title: formattedTitle,
         content,
         note_type: noteType,
         created_by: session?.user.id,
@@ -59,6 +104,7 @@ export function CreateNoteDialog({
       onOpenChange(false);
       setNoteTitle("");
       setContent("");
+      setUseAITitle(false);
     } catch (error) {
       toast({
         title: "エラー",
@@ -78,12 +124,24 @@ export function CreateNoteDialog({
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Input
-              placeholder="タイトル"
-              value={noteTitle}
-              onChange={(e) => setNoteTitle(e.target.value)}
-              required
-            />
+            <div className="flex items-center justify-between">
+              <Input
+                placeholder="タイトル"
+                value={noteTitle}
+                onChange={(e) => setNoteTitle(e.target.value)}
+                required={!useAITitle}
+                disabled={useAITitle}
+                className="flex-1 mr-2"
+              />
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="useAI"
+                  checked={useAITitle}
+                  onCheckedChange={(checked) => setUseAITitle(checked as boolean)}
+                />
+                <Label htmlFor="useAI" className="text-sm">AI生成</Label>
+              </div>
+            </div>
           </div>
           <div className="space-y-2">
             <Textarea
