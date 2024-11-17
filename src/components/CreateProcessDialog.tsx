@@ -10,12 +10,16 @@ import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Plus } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
+import * as z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-type FormData = {
-  title: string;
-  description: string;
-  percentage: number;
-};
+const formSchema = z.object({
+  title: z.string().min(1, "タイトルは必須です"),
+  description: z.string().optional(),
+  percentage: z.number().min(0).max(100),
+});
+
+type FormData = z.infer<typeof formSchema>;
 
 interface CreateProcessDialogProps {
   projectId: string;
@@ -26,7 +30,10 @@ export const CreateProcessDialog = ({ projectId }: CreateProcessDialogProps) => 
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
+      title: "",
+      description: "",
       percentage: 0,
     },
   });
@@ -37,7 +44,7 @@ export const CreateProcessDialog = ({ projectId }: CreateProcessDialogProps) => 
         .from("processes")
         .insert({
           title: data.title,
-          description: data.description,
+          description: data.description || null,
           project_id: projectId,
           percentage: data.percentage,
         });
@@ -79,7 +86,7 @@ export const CreateProcessDialog = ({ projectId }: CreateProcessDialogProps) => 
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-sm font-medium text-gray-700">タイトル</FormLabel>
+                  <FormLabel className="text-sm font-medium text-gray-700">タイトル *</FormLabel>
                   <FormControl>
                     <Input placeholder="工程のタイトルを入力" className="border-gray-200" {...field} />
                   </FormControl>
