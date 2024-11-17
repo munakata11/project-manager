@@ -19,7 +19,7 @@ export function ProjectTasks({ project }: ProjectTasksProps) {
     <Card className="w-full bg-white border-gray-100">
       <CardHeader className="flex flex-row items-center justify-between pb-3">
         <CardTitle className="text-lg font-semibold text-gray-900">
-          タスク
+          工程・タスク
         </CardTitle>
         <div className="flex gap-2">
           <CreateProcessDialog projectId={project.id} />
