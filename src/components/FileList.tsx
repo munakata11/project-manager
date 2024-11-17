@@ -112,8 +112,6 @@ export function FileList({ files, projectId, onRefetch }: FileListProps) {
                   </span>
                   <span className="mx-2">•</span>
                   <span>{(file.size / 1024 / 1024).toFixed(2)} MB</span>
-                  <span className="mx-2">•</span>
-                  <span>アップロード: {file.uploaded_by?.full_name}</span>
                 </div>
               </div>
               <div className="flex items-center gap-2">
