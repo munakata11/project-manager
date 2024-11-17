@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/AuthProvider";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { CalendarDays, Users } from "lucide-react";
+import { CalendarDays } from "lucide-react";
 import { CreateProjectDialog } from "@/components/CreateProjectDialog";
 
 const Index = () => {
@@ -18,9 +18,6 @@ const Index = () => {
         .from("projects")
         .select(`
           *,
-          project_members (
-            profile_id
-          ),
           tasks (
             id
           )
@@ -74,11 +71,7 @@ const Index = () => {
                   />
                 </div>
                 
-                <div className="flex justify-between text-sm text-gray-500">
-                  <div className="flex items-center gap-1.5">
-                    <Users className="h-4 w-4 text-gray-400" />
-                    <span>{project.project_members?.length || 0} メンバー</span>
-                  </div>
+                <div className="flex justify-end text-sm text-gray-500">
                   <div className="flex items-center gap-1.5">
                     <CalendarDays className="h-4 w-4 text-gray-400" />
                     <span>{new Date(project.created_at).toLocaleDateString('ja-JP')}</span>
