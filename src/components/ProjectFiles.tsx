@@ -128,8 +128,7 @@ export function ProjectFiles({ projectId }: ProjectFilesProps) {
                   className="bg-purple-600 hover:bg-purple-700"
                   disabled={isUploading}
                 >
-                  <FileUp className="h-4 w-4 mr-2" />
-                  アップロード
+                  <FileUp className="h-4 w-4" />
                 </Button>
               </div>
             </div>

@@ -106,9 +106,6 @@ export function MeetingNotes({ projectId }: MeetingNotesProps) {
             <p className="text-gray-600 whitespace-pre-wrap">
               {note.content}
             </p>
-            <div className="mt-2 text-sm text-gray-500">
-              作成者: {note.created_by?.full_name}
-            </div>
           </CardContent>
         </Card>
       ))}
