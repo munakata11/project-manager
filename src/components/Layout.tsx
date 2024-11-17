@@ -41,7 +41,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <div className="w-64 bg-white border-r border-gray-200 p-4">
         <div className="mb-8">
           <h1 className="text-xl font-semibold text-purple-600">
-            Project Manager
+            工程・タスク
           </h1>
         </div>
 
