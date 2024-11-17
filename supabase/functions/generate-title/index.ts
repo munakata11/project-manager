@@ -20,12 +20,12 @@ serve(async (req) => {
     }
 
     const configuration = new Configuration({
-      apiKey: Deno.env.get('OPENAI_API_KEY'),
+      apiKey: Deno.env.get('openai'),
     });
     const openai = new OpenAIApi(configuration);
 
     const completion = await openai.createChatCompletion({
-      model: "gpt-4",
+      model: "gpt-4o-mini",
       messages: [
         { 
           role: 'system', 
