@@ -12,6 +12,7 @@ interface ProcessCardProps {
     description: string | null;
     status: string | null;
     percentage: number;
+    order_index: number;
     tasks: any[];
   };
   projectId: string;
@@ -54,7 +55,7 @@ export const ProcessCard = ({ process, projectId }: ProcessCardProps) => {
         .from("processes")
         .update({ 
           status: checked ? "完了" : "進行中",
-          percentage: checked ? 100 : process.percentage
+          percentage: checked ? process.percentage : process.percentage
         })
         .eq("id", process.id);
 
@@ -78,7 +79,8 @@ export const ProcessCard = ({ process, projectId }: ProcessCardProps) => {
         .from("processes")
         .update({ 
           percentage: value,
-          status: value === 100 ? "完了" : "進行中"
+          status: value === 100 ? "完了" : "進行中",
+          order_index: process.order_index // 順序を維持
         })
         .eq("id", process.id);
 

@@ -14,6 +14,11 @@ interface ProjectTasksProps {
 
 export function ProjectTasks({ project }: ProjectTasksProps) {
   const otherTasks = project.tasks?.filter(task => !task.process_id) || [];
+  
+  // order_indexでソートした工程リストを作成
+  const sortedProcesses = [...(project.processes || [])].sort(
+    (a, b) => a.order_index - b.order_index
+  );
 
   return (
     <Card className="w-full bg-white border-gray-100">
@@ -28,7 +33,7 @@ export function ProjectTasks({ project }: ProjectTasksProps) {
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
-          {project.processes?.map((process) => (
+          {sortedProcesses.map((process) => (
             <ProcessCard
               key={process.id}
               process={process}
