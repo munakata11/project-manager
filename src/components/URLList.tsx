@@ -21,9 +21,7 @@ interface URLListProps {
 export function URLList({ urls, onRefetch }: URLListProps) {
   const { toast } = useToast();
 
-  const handleDelete = async (e: React.MouseEvent, id: string) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleDelete = async (id: string) => {
     if (!window.confirm("このURLを削除してもよろしいですか？")) return;
 
     try {
@@ -51,42 +49,41 @@ export function URLList({ urls, onRefetch }: URLListProps) {
   return (
     <div className="space-y-4">
       {urls?.map((url) => (
-        <a
-          key={url.id}
-          href={url.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block"
-        >
-          <Card className="border-gray-100 hover:border-purple-200 transition-colors">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <h3 className="font-medium text-gray-900">{url.title}</h3>
-                  {url.description && (
-                    <p className="mt-1 text-sm text-gray-600">{url.description}</p>
-                  )}
-                  <div className="mt-1 text-sm text-gray-500">
-                    <span>
-                      {new Date(url.created_at).toLocaleDateString("ja-JP")}
-                    </span>
-                    <span className="mx-2">•</span>
-                    <span>追加: {url.created_by?.full_name}</span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={(e) => handleDelete(e, url.id)}
-                  >
-                    <Trash2 className="h-4 w-4 text-red-500" />
-                  </Button>
+        <Card key={url.id} className="border-gray-100">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <a
+                  href={url.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium text-gray-900 hover:text-purple-600 transition-colors"
+                >
+                  <h3>{url.title}</h3>
+                </a>
+                {url.description && (
+                  <p className="mt-1 text-sm text-gray-600">{url.description}</p>
+                )}
+                <div className="mt-1 text-sm text-gray-500">
+                  <span>
+                    {new Date(url.created_at).toLocaleDateString("ja-JP")}
+                  </span>
+                  <span className="mx-2">•</span>
+                  <span>追加: {url.created_by?.full_name}</span>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        </a>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleDelete(url.id)}
+                >
+                  <Trash2 className="h-4 w-4 text-red-500" />
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       ))}
     </div>
   );
