@@ -72,6 +72,54 @@ export type Database = {
           },
         ]
       }
+      meeting_note_attachments: {
+        Row: {
+          id: string
+          note_id: string
+          filename: string
+          file_path: string
+          content_type: string | null
+          size: number | null
+          uploaded_by: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          note_id: string
+          filename: string
+          file_path: string
+          content_type?: string | null
+          size?: number | null
+          uploaded_by?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          note_id?: string
+          filename?: string
+          file_path?: string
+          content_type?: string | null
+          size?: number | null
+          uploaded_by?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meeting_note_attachments_note_id_fkey"
+            columns: ["note_id"]
+            isOneToOne: false
+            referencedRelation: "meeting_notes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meeting_note_attachments_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       processes: {
         Row: {
           created_at: string
@@ -130,7 +178,7 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           full_name?: string | null
-          id?: string
+          id: string
         }
         Relationships: []
       }
@@ -242,7 +290,7 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           id?: string
-          project_id?: string
+          project_id: string
           title?: string
           url?: string
         }
@@ -403,7 +451,7 @@ export type Tables<
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
     ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
         Database[PublicTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never,
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
       Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
@@ -415,10 +463,10 @@ export type Tables<
         PublicSchema["Views"])
     ? (PublicSchema["Tables"] &
         PublicSchema["Views"])[PublicTableNameOrOptions] extends {
-        Row: infer R
-      }
-      ? R
-      : never
+      Row: infer R
+    }
+    ? R
+    : never
     : never
 
 export type TablesInsert<
@@ -490,3 +538,4 @@ export type CompositeTypes<
   : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
     ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
+
