@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Notebook, Phone } from "lucide-react";
 import { CreateNoteDialog } from "./CreateNoteDialog";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -116,9 +116,12 @@ export function MeetingNotes({ projectId }: MeetingNotesProps) {
     <div className="space-y-6">
       <Card className="w-full bg-white border-gray-100">
         <CardHeader className="flex flex-row items-center justify-between pb-3">
-          <CardTitle className="text-lg font-semibold text-gray-900">
-            議事録
-          </CardTitle>
+          <div className="flex items-center gap-2">
+            <Notebook className="h-5 w-5 text-gray-500" />
+            <CardTitle className="text-lg font-semibold text-gray-900">
+              議事録
+            </CardTitle>
+          </div>
           <Button
             onClick={() => setIsCreateMeetingDialogOpen(true)}
             className="bg-purple-600 hover:bg-purple-700"
@@ -134,9 +137,12 @@ export function MeetingNotes({ projectId }: MeetingNotesProps) {
 
       <Card className="w-full bg-white border-gray-100">
         <CardHeader className="flex flex-row items-center justify-between pb-3">
-          <CardTitle className="text-lg font-semibold text-gray-900">
-            電話メモ
-          </CardTitle>
+          <div className="flex items-center gap-2">
+            <Phone className="h-5 w-5 text-gray-500" />
+            <CardTitle className="text-lg font-semibold text-gray-900">
+              電話メモ
+            </CardTitle>
+          </div>
           <Button
             onClick={() => setIsCreateCallDialogOpen(true)}
             className="bg-purple-600 hover:bg-purple-700"
