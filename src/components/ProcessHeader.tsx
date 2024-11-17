@@ -1,7 +1,6 @@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
-import { ProcessProgressInput } from "./ProcessProgressInput";
 
 interface ProcessHeaderProps {
   title: string;
@@ -9,7 +8,6 @@ interface ProcessHeaderProps {
   status: string | null;
   isUpdating: boolean;
   onStatusChange: (checked: boolean) => void;
-  onPercentageChange: (value: number) => void;
   onDelete: () => void;
 }
 
@@ -19,7 +17,6 @@ export const ProcessHeader = ({
   status,
   isUpdating,
   onStatusChange,
-  onPercentageChange,
   onDelete,
 }: ProcessHeaderProps) => {
   return (
@@ -32,11 +29,8 @@ export const ProcessHeader = ({
         />
         <div>
           <h3 className="text-lg font-medium text-gray-900">{title}</h3>
-          <div className="flex items-center gap-2">
-            <ProcessProgressInput
-              percentage={percentage || 0}
-              onChange={onPercentageChange}
-            />
+          <div className="text-sm text-gray-500">
+            進捗: {percentage}%
           </div>
         </div>
       </div>

@@ -81,48 +81,6 @@ export const ProcessCard = ({ process, projectId }: ProcessCardProps) => {
     }
   };
 
-  const handlePercentageChange = async (value: number) => {
-    try {
-      setIsUpdating(true);
-      const newStatus = value === 100 ? "完了" : "進行中";
-
-      console.log("Updating process with:", {
-        percentage: value,
-        status: newStatus,
-        processId: process.id,
-      });
-
-      const { data, error } = await supabase
-        .from("processes")
-        .update({
-          percentage: value,
-          status: newStatus,
-        })
-        .eq("id", process.id)
-        .select();
-
-      if (error) throw error;
-
-      console.log("Update response:", data);
-
-      toast({
-        title: "進捗率を更新しました",
-        description: `${value}%に更新しました`,
-      });
-
-      queryClient.invalidateQueries({ queryKey: ["project", projectId] });
-    } catch (error) {
-      console.error("Error updating percentage:", error);
-      toast({
-        title: "エラー",
-        description: "進捗率の更新に失敗しました。",
-        variant: "destructive",
-      });
-    } finally {
-      setIsUpdating(false);
-    }
-  };
-
   return (
     <div className="space-y-3">
       <ProcessHeader
@@ -131,7 +89,6 @@ export const ProcessCard = ({ process, projectId }: ProcessCardProps) => {
         status={process.status}
         isUpdating={isUpdating}
         onStatusChange={handleStatusChange}
-        onPercentageChange={handlePercentageChange}
         onDelete={handleDelete}
       />
 
