@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { Slider } from "@/components/ui/slider";
 import { useForm } from "react-hook-form";
+import { Input } from "@/components/ui/input";
 
 interface ProcessCardProps {
   process: {
@@ -64,27 +65,13 @@ export const ProcessCard = ({ process, projectId }: ProcessCardProps) => {
       setIsUpdating(true);
       const { error } = await supabase
         .from("processes")
-        .update({ status: checked ? "完了" : "進行中" })
+        .update({ 
+          status: checked ? "完了" : "進行中",
+          percentage: checked ? 100 : process.percentage
+        })
         .eq("id", process.id);
 
       if (error) throw error;
-
-      // Update project progress
-      const { data: processes } = await supabase
-        .from("processes")
-        .select("percentage, status")
-        .eq("project_id", projectId);
-
-      if (processes) {
-        const totalProgress = processes.reduce((acc, curr) => {
-          return acc + (curr.status === "完了" ? curr.percentage : 0);
-        }, 0);
-
-        await supabase
-          .from("projects")
-          .update({ progress: totalProgress })
-          .eq("id", projectId);
-      }
 
       queryClient.invalidateQueries({ queryKey: ["project", projectId] });
     } catch (error) {
@@ -102,7 +89,10 @@ export const ProcessCard = ({ process, projectId }: ProcessCardProps) => {
     try {
       const { error } = await supabase
         .from("processes")
-        .update({ percentage: data.percentage })
+        .update({ 
+          percentage: data.percentage,
+          status: data.percentage === 100 ? "完了" : "進行中"
+        })
         .eq("id", process.id);
 
       if (error) throw error;
@@ -122,6 +112,10 @@ export const ProcessCard = ({ process, projectId }: ProcessCardProps) => {
     }
   };
 
+  const handlePercentageChange = (value: number) => {
+    form.setValue("percentage", value);
+  };
+
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
@@ -134,7 +128,7 @@ export const ProcessCard = ({ process, projectId }: ProcessCardProps) => {
           <div>
             <h3 className="text-lg font-medium text-gray-900">{process.title}</h3>
             <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-500">進捗割合: {process.percentage}%</span>
+              <span className="text-sm text-gray-500">進捗割合: {process.percentage || 0}%</span>
               <Button
                 variant="ghost"
                 size="sm"
@@ -179,13 +173,42 @@ export const ProcessCard = ({ process, projectId }: ProcessCardProps) => {
                   <FormItem>
                     <FormLabel>進捗率 ({field.value}%)</FormLabel>
                     <FormControl>
-                      <Slider
-                        min={0}
-                        max={100}
-                        step={1}
-                        value={[field.value]}
-                        onValueChange={(value) => field.onChange(value[0])}
-                      />
+                      <div className="space-y-2">
+                        <Slider
+                          min={0}
+                          max={100}
+                          step={1}
+                          value={[field.value]}
+                          onValueChange={(value) => handlePercentageChange(value[0])}
+                          className="mb-2"
+                        />
+                        <div className="flex items-center gap-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handlePercentageChange(Math.max(0, field.value - 10))}
+                          >
+                            -10%
+                          </Button>
+                          <Input
+                            type="number"
+                            min={0}
+                            max={100}
+                            {...field}
+                            onChange={(e) => handlePercentageChange(Number(e.target.value))}
+                            className="w-20"
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handlePercentageChange(Math.min(100, field.value + 10))}
+                          >
+                            +10%
+                          </Button>
+                        </div>
+                      </div>
                     </FormControl>
                   </FormItem>
                 )}
