@@ -29,10 +29,13 @@ interface ProjectFormFieldsProps {
 }
 
 export function ProjectFormFields({ form }: ProjectFormFieldsProps) {
-  const handleAmountExclTaxChange = (value: number) => {
-    form.setValue("amount_excl_tax", value);
+  const handleAmountExclTaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // 空文字列の場合は0として扱う
+    const numValue = value === "" ? 0 : parseFloat(value);
+    form.setValue("amount_excl_tax", numValue);
     // Calculate tax-inclusive amount (10% tax)
-    form.setValue("amount_incl_tax", Math.round(value * 1.1));
+    form.setValue("amount_incl_tax", Math.round(numValue * 1.1));
   };
 
   return (
@@ -131,8 +134,10 @@ export function ProjectFormFields({ form }: ProjectFormFieldsProps) {
               <Input
                 type="number"
                 placeholder="0"
-                {...field}
-                onChange={(e) => handleAmountExclTaxChange(e.target.valueAsNumber || 0)}
+                value={field.value}
+                onChange={handleAmountExclTaxChange}
+                min="0"
+                step="1"
               />
             </FormControl>
             <FormMessage />
@@ -150,7 +155,7 @@ export function ProjectFormFields({ form }: ProjectFormFieldsProps) {
               <Input
                 type="number"
                 placeholder="0"
-                {...field}
+                value={field.value}
                 disabled
               />
             </FormControl>
