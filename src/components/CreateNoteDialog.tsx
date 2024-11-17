@@ -42,20 +42,11 @@ export function CreateNoteDialog({
 
   const generateTitle = async (content: string) => {
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-title`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-          },
-          body: JSON.stringify({ content }),
-        }
-      );
+      const { data, error } = await supabase.functions.invoke('generate-title', {
+        body: { content }
+      });
 
-      if (!response.ok) throw new Error("Failed to generate title");
-      const data = await response.json();
+      if (error) throw error;
       return data.title;
     } catch (error) {
       console.error("Error generating title:", error);
