@@ -9,6 +9,24 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      contractor_companies: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       meeting_notes: {
         Row: {
           content: string | null
@@ -249,6 +267,7 @@ export type Database = {
         Row: {
           amount_excl_tax: number | null
           amount_incl_tax: number | null
+          contractor_company_id: string | null
           created_at: string
           description: string | null
           design_period: string | null
@@ -261,6 +280,7 @@ export type Database = {
         Insert: {
           amount_excl_tax?: number | null
           amount_incl_tax?: number | null
+          contractor_company_id?: string | null
           created_at?: string
           description?: string | null
           design_period?: string | null
@@ -273,6 +293,7 @@ export type Database = {
         Update: {
           amount_excl_tax?: number | null
           amount_incl_tax?: number | null
+          contractor_company_id?: string | null
           created_at?: string
           description?: string | null
           design_period?: string | null
@@ -283,6 +304,13 @@ export type Database = {
           title?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "projects_contractor_company_id_fkey"
+            columns: ["contractor_company_id"]
+            isOneToOne: false
+            referencedRelation: "contractor_companies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "projects_owner_id_fkey"
             columns: ["owner_id"]
