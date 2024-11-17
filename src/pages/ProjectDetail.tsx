@@ -5,7 +5,6 @@ import { useAuth } from "@/components/AuthProvider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MeetingNotes } from "@/components/MeetingNotes";
 import { ProjectFiles } from "@/components/ProjectFiles";
-import { ProjectOverview } from "@/components/ProjectOverview";
 import { ProjectTasks } from "@/components/ProjectTasks";
 
 const ProjectDetail = () => {
@@ -19,13 +18,6 @@ const ProjectDetail = () => {
         .from("projects")
         .select(`
           *,
-          project_members (
-            profile_id,
-            profiles (
-              full_name,
-              avatar_url
-            )
-          ),
           processes (
             id,
             title,
@@ -84,8 +76,6 @@ const ProjectDetail = () => {
         <h1 className="text-2xl font-semibold text-gray-900">{project.title}</h1>
         <p className="mt-1 text-gray-500">{project.description}</p>
       </div>
-
-      <ProjectOverview project={project} />
 
       <Tabs defaultValue="tasks" className="w-full">
         <TabsList>
