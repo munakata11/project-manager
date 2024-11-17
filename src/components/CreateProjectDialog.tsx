@@ -14,21 +14,36 @@ import { useAuth } from "@/components/AuthProvider";
 import { Plus, CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 
-type FormData = {
-  title: string;
-  description: string;
-  design_period: Date;
-  amount_excl_tax: number;
-  amount_incl_tax: number;
-};
+const formSchema = z.object({
+  title: z.string().min(1, "プロジェクト名は必須です"),
+  description: z.string().optional(),
+  design_period: z.date({
+    required_error: "設計工期は必須です",
+  }),
+  amount_excl_tax: z.number().min(0, "0以上の数値を入力してください"),
+  amount_incl_tax: z.number().min(0, "0以上の数値を入力してください"),
+});
+
+type FormData = z.infer<typeof formSchema>;
 
 export const CreateProjectDialog = () => {
   const [open, setOpen] = useState(false);
   const { session } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const form = useForm<FormData>();
+  
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      title: "",
+      description: "",
+      amount_excl_tax: 0,
+      amount_incl_tax: 0,
+    },
+  });
 
   const onSubmit = async (data: FormData) => {
     try {
@@ -36,7 +51,7 @@ export const CreateProjectDialog = () => {
         .from("projects")
         .insert({
           title: data.title,
-          description: data.description,
+          description: data.description || null,
           design_period: data.design_period.toISOString(),
           amount_excl_tax: data.amount_excl_tax,
           amount_incl_tax: data.amount_incl_tax,
@@ -162,8 +177,8 @@ export const CreateProjectDialog = () => {
                       type="number" 
                       placeholder="0" 
                       className="border-gray-200" 
-                      {...field} 
-                      onChange={e => field.onChange(e.target.valueAsNumber)}
+                      {...field}
+                      onChange={(e) => field.onChange(e.target.valueAsNumber || 0)}
                     />
                   </FormControl>
                   <FormMessage />
@@ -182,7 +197,7 @@ export const CreateProjectDialog = () => {
                       placeholder="0" 
                       className="border-gray-200" 
                       {...field}
-                      onChange={e => field.onChange(e.target.valueAsNumber)}
+                      onChange={(e) => field.onChange(e.target.valueAsNumber || 0)}
                     />
                   </FormControl>
                   <FormMessage />
