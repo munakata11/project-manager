@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { ExternalLink, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 
 interface URLListProps {
   urls: {
@@ -49,7 +49,11 @@ export function URLList({ urls, onRefetch }: URLListProps) {
   return (
     <div className="space-y-4">
       {urls?.map((url) => (
-        <Card key={url.id} className="border-gray-100">
+        <Card 
+          key={url.id} 
+          className="border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors"
+          onClick={() => window.open(url.url, "_blank")}
+        >
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div className="flex-1">
@@ -63,18 +67,14 @@ export function URLList({ urls, onRefetch }: URLListProps) {
                   </span>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center">
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => window.open(url.url, "_blank")}
-                >
-                  <ExternalLink className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleDelete(url.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDelete(url.id);
+                  }}
                 >
                   <Trash2 className="h-4 w-4 text-red-500" />
                 </Button>
