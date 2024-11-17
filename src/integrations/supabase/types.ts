@@ -247,8 +247,11 @@ export type Database = {
       }
       projects: {
         Row: {
+          amount_excl_tax: number | null
+          amount_incl_tax: number | null
           created_at: string
           description: string | null
+          design_period: string | null
           id: string
           owner_id: string
           progress: number | null
@@ -256,8 +259,11 @@ export type Database = {
           title: string
         }
         Insert: {
+          amount_excl_tax?: number | null
+          amount_incl_tax?: number | null
           created_at?: string
           description?: string | null
+          design_period?: string | null
           id?: string
           owner_id: string
           progress?: number | null
@@ -265,8 +271,11 @@ export type Database = {
           title: string
         }
         Update: {
+          amount_excl_tax?: number | null
+          amount_incl_tax?: number | null
           created_at?: string
           description?: string | null
+          design_period?: string | null
           id?: string
           owner_id?: string
           progress?: number | null
