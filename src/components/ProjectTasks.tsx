@@ -1,6 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CreateTaskDialog } from "@/components/CreateTaskDialog";
-import { ProjectMembersDialog } from "@/components/ProjectMembersDialog";
 import { CreateProcessDialog } from "@/components/CreateProcessDialog";
 import { ProcessCard } from "@/components/ProcessCard";
 import { TaskCard } from "@/components/TaskCard";
@@ -10,7 +9,6 @@ interface ProjectTasksProps {
     id: string;
     processes: any[];
     tasks: any[];
-    project_members: any[];  // 追加：project_membersプロパティを型定義に追加
   };
 }
 
@@ -24,10 +22,6 @@ export function ProjectTasks({ project }: ProjectTasksProps) {
           タスク
         </CardTitle>
         <div className="flex gap-2">
-          <ProjectMembersDialog
-            projectId={project.id}
-            currentMembers={project.project_members || []}
-          />
           <CreateProcessDialog projectId={project.id} />
           <CreateTaskDialog projectId={project.id} />
         </div>
