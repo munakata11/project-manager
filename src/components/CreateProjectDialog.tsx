@@ -6,14 +6,21 @@ import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/AuthProvider";
-import { Plus } from "lucide-react";
+import { Plus, CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 type FormData = {
   title: string;
   description: string;
+  design_period: Date;
+  amount_excl_tax: number;
+  amount_incl_tax: number;
 };
 
 export const CreateProjectDialog = () => {
@@ -30,6 +37,9 @@ export const CreateProjectDialog = () => {
         .insert({
           title: data.title,
           description: data.description,
+          design_period: data.design_period.toISOString(),
+          amount_excl_tax: data.amount_excl_tax,
+          amount_incl_tax: data.amount_incl_tax,
           owner_id: session?.user?.id,
         })
         .select()
@@ -45,8 +55,8 @@ export const CreateProjectDialog = () => {
         });
 
         toast({
-          title: "Success",
-          description: "Project created successfully.",
+          title: "成功",
+          description: "プロジェクトを作成しました。",
         });
 
         setOpen(false);
@@ -54,8 +64,8 @@ export const CreateProjectDialog = () => {
       }
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to create project. Please try again.",
+        title: "エラー",
+        description: "プロジェクトの作成に失敗しました。",
         variant: "destructive",
       });
     }
@@ -66,12 +76,12 @@ export const CreateProjectDialog = () => {
       <DialogTrigger asChild>
         <Button className="bg-purple-600 hover:bg-purple-700 text-white">
           <Plus className="w-4 h-4 mr-2" />
-          New Project
+          新規プロジェクト
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle className="text-lg font-semibold text-gray-900">Create New Project</DialogTitle>
+          <DialogTitle className="text-lg font-semibold text-gray-900">新規プロジェクト作成</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -80,9 +90,9 @@ export const CreateProjectDialog = () => {
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-sm font-medium text-gray-700">Title</FormLabel>
+                  <FormLabel className="text-sm font-medium text-gray-700">プロジェクト名</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter project title" className="border-gray-200" {...field} />
+                    <Input placeholder="プロジェクト名を入力" className="border-gray-200" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -93,16 +103,94 @@ export const CreateProjectDialog = () => {
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-sm font-medium text-gray-700">Description</FormLabel>
+                  <FormLabel className="text-sm font-medium text-gray-700">説明</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Enter project description" className="border-gray-200" {...field} />
+                    <Textarea placeholder="プロジェクトの説明を入力" className="border-gray-200" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="design_period"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel className="text-sm font-medium text-gray-700">設計工期</FormLabel>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full pl-3 text-left font-normal",
+                            !field.value && "text-muted-foreground"
+                          )}
+                        >
+                          {field.value ? (
+                            format(field.value, "yyyy年MM月dd日")
+                          ) : (
+                            <span>日付を選択</span>
+                          )}
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={field.value}
+                        onSelect={field.onChange}
+                        disabled={(date) =>
+                          date < new Date()
+                        }
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="amount_excl_tax"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-sm font-medium text-gray-700">受注金額（税抜）</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="number" 
+                      placeholder="0" 
+                      className="border-gray-200" 
+                      {...field} 
+                      onChange={e => field.onChange(e.target.valueAsNumber)}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="amount_incl_tax"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-sm font-medium text-gray-700">受注金額（税込）</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="number" 
+                      placeholder="0" 
+                      className="border-gray-200" 
+                      {...field}
+                      onChange={e => field.onChange(e.target.valueAsNumber)}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
             <Button type="submit" className="w-full bg-purple-600 hover:bg-purple-700 text-white">
-              Create Project
+              作成
             </Button>
           </form>
         </Form>
