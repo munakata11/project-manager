@@ -17,9 +17,6 @@ interface Note {
   content: string | null;
   note_type: string;
   created_at: string;
-  created_by: {
-    full_name: string | null;
-  } | null;
 }
 
 export function MeetingNotes({ projectId }: MeetingNotesProps) {
@@ -33,12 +30,7 @@ export function MeetingNotes({ projectId }: MeetingNotesProps) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("meeting_notes")
-        .select(`
-          *,
-          created_by:profiles (
-            full_name
-          )
-        `)
+        .select("*")
         .eq("project_id", projectId)
         .order("created_at", { ascending: false });
 
@@ -106,9 +98,6 @@ export function MeetingNotes({ projectId }: MeetingNotesProps) {
             <p className="text-gray-600 whitespace-pre-wrap">
               {note.content}
             </p>
-            <div className="mt-2 text-sm text-gray-500">
-              作成者: {note.created_by?.full_name}
-            </div>
           </CardContent>
         </Card>
       ))}
