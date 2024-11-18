@@ -53,7 +53,7 @@ export function MeetingNotes({ projectId }: MeetingNotesProps) {
           )
         `)
         .eq("project_id", projectId)
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: true }); // Changed to ascending order
 
       if (error) throw error;
       return data as Note[];
