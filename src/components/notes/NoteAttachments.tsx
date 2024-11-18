@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Download, ExternalLink } from "lucide-react";
+import { Download } from "lucide-react";
 
 interface Attachment {
   id: string;
@@ -19,7 +19,8 @@ interface NoteAttachmentsProps {
 export function NoteAttachments({ noteId, attachments }: NoteAttachmentsProps) {
   const { toast } = useToast();
 
-  const handleDownload = async (filePath: string, filename: string) => {
+  const handleDownload = async (e: React.MouseEvent, filePath: string, filename: string) => {
+    e.stopPropagation();
     try {
       const { data, error } = await supabase.storage
         .from("meeting-attachments")
@@ -61,25 +62,20 @@ export function NoteAttachments({ noteId, attachments }: NoteAttachmentsProps) {
   return (
     <div className="mt-4">
       {attachments.map((attachment) => (
-        <Card key={attachment.id} className="p-3 mb-2 border-gray-100">
+        <Card 
+          key={attachment.id} 
+          className="p-3 mb-2 border-gray-100 cursor-pointer hover:border-purple-200 transition-colors"
+          onClick={() => handleOpen(attachment.file_path)}
+        >
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-600">{attachment.filename}</span>
-            <div className="flex gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleOpen(attachment.file_path)}
-              >
-                <ExternalLink className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleDownload(attachment.file_path, attachment.filename)}
-              >
-                <Download className="h-4 w-4" />
-              </Button>
-            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={(e) => handleDownload(e, attachment.file_path, attachment.filename)}
+            >
+              <Download className="h-4 w-4" />
+            </Button>
           </div>
         </Card>
       ))}

@@ -133,27 +133,6 @@ export function MeetingNotes({ projectId }: MeetingNotesProps) {
       <Card className="w-full bg-white border-gray-100">
         <CardHeader className="flex flex-row items-center justify-between pb-3">
           <div className="flex items-center gap-2">
-            <Notebook className="h-5 w-5 text-gray-500" />
-            <CardTitle className="text-lg font-semibold text-gray-900">
-              議事録
-            </CardTitle>
-          </div>
-          <Button
-            onClick={() => setIsCreateMeetingDialogOpen(true)}
-            className="bg-purple-600 hover:bg-purple-700"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            新規作成
-          </Button>
-        </CardHeader>
-        <CardContent>
-          <NotesList notes={meetingNotes} title="議事録" />
-        </CardContent>
-      </Card>
-
-      <Card className="w-full bg-white border-gray-100">
-        <CardHeader className="flex flex-row items-center justify-between pb-3">
-          <div className="flex items-center gap-2">
             <Phone className="h-5 w-5 text-gray-500" />
             <CardTitle className="text-lg font-semibold text-gray-900">
               電話メモ
@@ -169,6 +148,27 @@ export function MeetingNotes({ projectId }: MeetingNotesProps) {
         </CardHeader>
         <CardContent>
           <NotesList notes={callNotes} title="電話メモ" />
+        </CardContent>
+      </Card>
+
+      <Card className="w-full bg-white border-gray-100">
+        <CardHeader className="flex flex-row items-center justify-between pb-3">
+          <div className="flex items-center gap-2">
+            <Notebook className="h-5 w-5 text-gray-500" />
+            <CardTitle className="text-lg font-semibold text-gray-900">
+              議事録
+            </CardTitle>
+          </div>
+          <Button
+            onClick={() => setIsCreateMeetingDialogOpen(true)}
+            className="bg-purple-600 hover:bg-purple-700"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            新規作成
+          </Button>
+        </CardHeader>
+        <CardContent>
+          <NotesList notes={meetingNotes} title="議事録" />
         </CardContent>
       </Card>
 
