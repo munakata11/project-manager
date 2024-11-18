@@ -11,16 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
-
-interface Note {
-  id: string;
-  title: string;
-  content: string | null;
-  note_type: "meeting" | "call";
-  participants?: string | null;
-  location?: string | null;
-  contact_person?: string | null;
-}
+import { Note } from "@/types/note";
 
 interface EditNoteDialogProps {
   note: Note;

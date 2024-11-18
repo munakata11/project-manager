@@ -77,29 +77,38 @@ export type Database = {
       }
       meeting_notes: {
         Row: {
+          contact_person: string | null
           content: string | null
           created_at: string
           created_by: string | null
           id: string
+          location: string | null
           note_type: string
+          participants: string | null
           project_id: string
           title: string
         }
         Insert: {
+          contact_person?: string | null
           content?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
+          location?: string | null
           note_type: string
+          participants?: string | null
           project_id: string
           title: string
         }
         Update: {
+          contact_person?: string | null
           content?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
+          location?: string | null
           note_type?: string
+          participants?: string | null
           project_id?: string
           title?: string
         }
