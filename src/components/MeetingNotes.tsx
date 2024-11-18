@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Plus, Trash2, Notebook, Phone } from "lucide-react";
 import { CreateNoteDialog } from "./CreateNoteDialog";
 import { useToast } from "@/components/ui/use-toast";
+import { NoteAttachments } from "./notes/NoteAttachments";
 
 interface MeetingNotesProps {
   projectId: string;
@@ -37,6 +38,12 @@ export function MeetingNotes({ projectId }: MeetingNotesProps) {
           *,
           created_by:profiles (
             full_name
+          ),
+          meeting_note_attachments (
+            id,
+            filename,
+            file_path,
+            created_at
           )
         `)
         .eq("project_id", projectId)
@@ -106,6 +113,9 @@ export function MeetingNotes({ projectId }: MeetingNotesProps) {
             <p className="text-gray-600 whitespace-pre-wrap">
               {note.content}
             </p>
+            {note.note_type === "meeting" && note.meeting_note_attachments && (
+              <NoteAttachments noteId={note.id} attachments={note.meeting_note_attachments} />
+            )}
           </CardContent>
         </Card>
       ))}
