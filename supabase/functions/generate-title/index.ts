@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { Configuration, OpenAIApi } from "https://esm.sh/openai@3.2.1";
+import "https://deno.land/x/xhr@0.1.0/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -7,7 +7,6 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -19,26 +18,34 @@ serve(async (req) => {
       throw new Error('Content is required');
     }
 
-    const configuration = new Configuration({
-      apiKey: Deno.env.get('openai'),
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${Deno.env.get('openai')}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [
+          { 
+            role: 'system', 
+            content: '議事録や電話メモのタイトルを生成する専門家として、内容から簡潔で分かりやすいタイトルを20文字以内で生成してください。' 
+          },
+          { role: 'user', content }
+        ],
+        max_tokens: 100,
+        temperature: 0.7,
+      }),
     });
-    const openai = new OpenAIApi(configuration);
 
-    const completion = await openai.createChatCompletion({
-      model: "gpt-4o-mini",
-      messages: [
-        { 
-          role: 'system', 
-          content: 'あなたは議事録や電話メモのタイトルを生成する専門家です。内容から簡潔で分かりやすいタイトルを生成してください。タイトルは20文字以内に収めてください。' 
-        },
-        { role: 'user', content }
-      ],
-    });
+    const data = await response.json();
 
-    const generatedTitle = completion.data.choices[0].message?.content || '無題';
+    if (!data.choices || !data.choices[0]?.message?.content) {
+      throw new Error('Failed to generate title');
+    }
 
     return new Response(
-      JSON.stringify({ title: generatedTitle }),
+      JSON.stringify({ title: data.choices[0].message.content.trim() }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       },
@@ -46,7 +53,10 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: 'タイトルの生成に失敗しました。もう一度お試しください。',
+        details: error.message 
+      }),
       { 
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Edit, FileText, Trash2 } from "lucide-react";
+import { Edit, Trash2 } from "lucide-react";
 import { Note } from "@/types/note";
 import { NoteAttachments } from "./NoteAttachments";
 
@@ -22,12 +22,13 @@ export function NoteCard({ note, onEdit, onDelete, onFormat }: NoteCardProps) {
               {new Date(note.created_at).toLocaleDateString("ja-JP")}
             </span>
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
               onClick={() => onFormat(note)}
               title="整形"
+              className="bg-white"
             >
-              <FileText className="h-4 w-4 text-purple-500" />
+              整形
             </Button>
             <Button
               variant="ghost"
