@@ -10,6 +10,7 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "../AuthProvider";
 import { NoteForm } from "./NoteForm";
+import { uploadAttachment } from "./noteUtils";
 
 interface CreateNoteDialogProps {
   projectId: string;
@@ -51,38 +52,17 @@ export function CreateNoteDialog({
     }
   };
 
-  const uploadFile = async (file: File, noteId: string) => {
-    try {
-      const fileExt = file.name.split(".").pop();
-      const filePath = `${noteId}/${Date.now()}.${fileExt}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from("meeting-attachments")
-        .upload(filePath, file);
-
-      if (uploadError) throw uploadError;
-
-      const { error: dbError } = await supabase
-        .from("meeting_note_attachments")
-        .insert({
-          note_id: noteId,
-          filename: file.name,
-          file_path: filePath,
-          content_type: file.type,
-          size: file.size,
-          uploaded_by: session?.user.id,
-        });
-
-      if (dbError) throw dbError;
-    } catch (error) {
-      console.error("Error uploading file:", error);
-      throw error;
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!content || (!noteTitle && !useAITitle)) return;
+    if (!session?.user?.id) {
+      toast({
+        title: "エラー",
+        description: "ログインが必要です。",
+        variant: "destructive",
+      });
+      return;
+    }
 
     try {
       setIsLoading(true);
@@ -110,7 +90,7 @@ export function CreateNoteDialog({
           title: formattedTitle,
           content,
           note_type: noteType,
-          created_by: session?.user.id,
+          created_by: session.user.id,
         })
         .select()
         .single();
@@ -119,7 +99,7 @@ export function CreateNoteDialog({
 
       if (files.length > 0) {
         for (const file of files) {
-          await uploadFile(file, noteData.id);
+          await uploadAttachment(file, noteData.id, session.user.id);
         }
       }
 
