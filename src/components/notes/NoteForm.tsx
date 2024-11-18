@@ -19,6 +19,12 @@ interface NoteFormProps {
   onCancel: () => void;
   isLoading: boolean;
   noteType: "meeting" | "call";
+  participants?: string;
+  setParticipants?: (participants: string) => void;
+  location?: string;
+  setLocation?: (location: string) => void;
+  contactPerson?: string;
+  setContactPerson?: (person: string) => void;
 }
 
 export function NoteForm({
@@ -34,6 +40,12 @@ export function NoteForm({
   onCancel,
   isLoading,
   noteType,
+  participants,
+  setParticipants,
+  location,
+  setLocation,
+  contactPerson,
+  setContactPerson,
 }: NoteFormProps) {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(e.target.files || []);
@@ -66,6 +78,40 @@ export function NoteForm({
           </div>
         </div>
       </div>
+
+      {noteType === "call" && setContactPerson && (
+        <div className="space-y-2">
+          <Input
+            placeholder="相手"
+            value={contactPerson}
+            onChange={(e) => setContactPerson(e.target.value)}
+          />
+        </div>
+      )}
+
+      {noteType === "meeting" && (
+        <>
+          {setParticipants && (
+            <div className="space-y-2">
+              <Input
+                placeholder="参加者"
+                value={participants}
+                onChange={(e) => setParticipants(e.target.value)}
+              />
+            </div>
+          )}
+          {setLocation && (
+            <div className="space-y-2">
+              <Input
+                placeholder="場所"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+              />
+            </div>
+          )}
+        </>
+      )}
+
       <div className="space-y-2">
         <Textarea
           placeholder="内容"
@@ -75,6 +121,7 @@ export function NoteForm({
           className="min-h-[200px]"
         />
       </div>
+
       {noteType === "meeting" && (
         <div className="space-y-2">
           <div className="flex items-center space-x-2">
@@ -98,6 +145,7 @@ export function NoteForm({
           )}
         </div>
       )}
+
       <div className="flex justify-end gap-2">
         <Button
           type="button"

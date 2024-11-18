@@ -3,8 +3,9 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2, Notebook, Phone } from "lucide-react";
-import { CreateNoteDialog } from "./CreateNoteDialog";
+import { Plus, Trash2, Notebook, Phone, Edit, FileText } from "lucide-react";
+import { CreateNoteDialog } from "./notes/CreateNoteDialog";
+import { EditNoteDialog } from "./notes/EditNoteDialog";
 import { useToast } from "@/components/ui/use-toast";
 import { NoteAttachments } from "./notes/NoteAttachments";
 
@@ -18,6 +19,9 @@ interface Note {
   content: string | null;
   note_type: string;
   created_at: string;
+  participants?: string | null;
+  location?: string | null;
+  contact_person?: string | null;
   created_by: {
     full_name: string | null;
   } | null;
@@ -32,6 +36,7 @@ interface Note {
 export function MeetingNotes({ projectId }: MeetingNotesProps) {
   const [isCreateMeetingDialogOpen, setIsCreateMeetingDialogOpen] = useState(false);
   const [isCreateCallDialogOpen, setIsCreateCallDialogOpen] = useState(false);
+  const [editingNote, setEditingNote] = useState<Note | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -53,7 +58,7 @@ export function MeetingNotes({ projectId }: MeetingNotesProps) {
           )
         `)
         .eq("project_id", projectId)
-        .order("created_at", { ascending: true }); // Changed to ascending order
+        .order("created_at", { ascending: true });
 
       if (error) throw error;
       return data as Note[];
@@ -85,6 +90,35 @@ export function MeetingNotes({ projectId }: MeetingNotesProps) {
     }
   };
 
+  const handleFormat = async (note: Note) => {
+    try {
+      const { data, error } = await supabase.functions.invoke('format-note', {
+        body: { content: note.content, noteType: note.note_type }
+      });
+
+      if (error) throw error;
+
+      const { error: updateError } = await supabase
+        .from('meeting_notes')
+        .update({ content: data.content })
+        .eq('id', note.id);
+
+      if (updateError) throw updateError;
+
+      toast({
+        title: "メモを整形しました",
+      });
+
+      queryClient.invalidateQueries({ queryKey: ["meeting-notes", projectId] });
+    } catch (error) {
+      toast({
+        title: "エラー",
+        description: "メモの整形に失敗しました。",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -110,13 +144,49 @@ export function MeetingNotes({ projectId }: MeetingNotesProps) {
                 <Button
                   variant="ghost"
                   size="sm"
+                  onClick={() => handleFormat(note)}
+                  title="整形"
+                >
+                  <FileText className="h-4 w-4 text-purple-500" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setEditingNote(note)}
+                  title="編集"
+                >
+                  <Edit className="h-4 w-4 text-blue-500" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => handleDelete(note.id)}
+                  title="削除"
                 >
                   <Trash2 className="h-4 w-4 text-red-500" />
                 </Button>
               </div>
             </div>
-            <p className="text-gray-600 whitespace-pre-wrap">
+            {note.note_type === "call" && note.contact_person && (
+              <p className="text-sm text-gray-600 mb-2">
+                相手: {note.contact_person}
+              </p>
+            )}
+            {note.note_type === "meeting" && (
+              <>
+                {note.participants && (
+                  <p className="text-sm text-gray-600">
+                    参加者: {note.participants}
+                  </p>
+                )}
+                {note.location && (
+                  <p className="text-sm text-gray-600">
+                    場所: {note.location}
+                  </p>
+                )}
+              </>
+            )}
+            <p className="text-gray-600 whitespace-pre-wrap mt-2">
               {note.content}
             </p>
             {note.note_type === "meeting" && note.meeting_note_attachments && (
@@ -188,6 +258,13 @@ export function MeetingNotes({ projectId }: MeetingNotesProps) {
         title="電話メモの作成"
         noteCount={callNotes.length}
       />
+      {editingNote && (
+        <EditNoteDialog
+          note={editingNote}
+          open={!!editingNote}
+          onOpenChange={(open) => !open && setEditingNote(null)}
+        />
+      )}
     </div>
   );
 }

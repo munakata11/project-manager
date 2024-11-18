@@ -31,6 +31,9 @@ export function CreateNoteDialog({
 }: CreateNoteDialogProps) {
   const [noteTitle, setNoteTitle] = useState("");
   const [content, setContent] = useState("");
+  const [participants, setParticipants] = useState("");
+  const [location, setLocation] = useState("");
+  const [contactPerson, setContactPerson] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [useAITitle, setUseAITitle] = useState(true);
   const [files, setFiles] = useState<File[]>([]);
@@ -83,15 +86,23 @@ export function CreateNoteDialog({
 
       const formattedTitle = `${noteType === "meeting" ? "議事録" : "電話メモ"}#${noteCount + 1} ${finalTitle}`;
 
-      const { data: noteData, error } = await supabase
+      const noteData = {
+        project_id: projectId,
+        title: formattedTitle,
+        content,
+        note_type: noteType,
+        created_by: session.user.id,
+        ...(noteType === "meeting" ? {
+          participants,
+          location,
+        } : {
+          contact_person: contactPerson,
+        }),
+      };
+
+      const { data: newNote, error } = await supabase
         .from("meeting_notes")
-        .insert({
-          project_id: projectId,
-          title: formattedTitle,
-          content,
-          note_type: noteType,
-          created_by: session.user.id,
-        })
+        .insert(noteData)
         .select()
         .single();
 
@@ -99,7 +110,7 @@ export function CreateNoteDialog({
 
       if (files.length > 0) {
         for (const file of files) {
-          await uploadAttachment(file, noteData.id, session.user.id);
+          await uploadAttachment(file, newNote.id, session.user.id);
         }
       }
 
@@ -111,6 +122,9 @@ export function CreateNoteDialog({
       onOpenChange(false);
       setNoteTitle("");
       setContent("");
+      setParticipants("");
+      setLocation("");
+      setContactPerson("");
       setUseAITitle(true);
       setFiles([]);
     } catch (error) {
@@ -144,6 +158,12 @@ export function CreateNoteDialog({
           onCancel={() => onOpenChange(false)}
           isLoading={isLoading}
           noteType={noteType}
+          participants={participants}
+          setParticipants={setParticipants}
+          location={location}
+          setLocation={setLocation}
+          contactPerson={contactPerson}
+          setContactPerson={setContactPerson}
         />
       </DialogContent>
     </Dialog>
