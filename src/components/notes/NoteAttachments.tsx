@@ -13,9 +13,10 @@ interface Attachment {
 
 interface NoteAttachmentsProps {
   noteId: string;
+  attachments: Attachment[];
 }
 
-export function NoteAttachments({ noteId }: NoteAttachmentsProps) {
+export function NoteAttachments({ noteId, attachments }: NoteAttachmentsProps) {
   const { toast } = useToast();
 
   const handleDownload = async (filePath: string, filename: string) => {
@@ -43,7 +44,7 @@ export function NoteAttachments({ noteId }: NoteAttachmentsProps) {
 
   return (
     <div className="mt-4">
-      {attachments?.map((attachment) => (
+      {attachments.map((attachment) => (
         <Card key={attachment.id} className="p-3 mb-2 border-gray-100">
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-600">{attachment.filename}</span>

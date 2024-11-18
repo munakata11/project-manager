@@ -21,6 +21,12 @@ interface Note {
   created_by: {
     full_name: string | null;
   } | null;
+  meeting_note_attachments?: Array<{
+    id: string;
+    filename: string;
+    file_path: string;
+    created_at: string;
+  }>;
 }
 
 export function MeetingNotes({ projectId }: MeetingNotesProps) {
