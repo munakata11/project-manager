@@ -8,14 +8,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Plus } from "lucide-react";
-import { useQueryClient, useQuery } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import * as z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-type FormData = {
-  title: string;
-  description: string;
-  due_date: string;
-  process_id?: string;
-};
+const formSchema = z.object({
+  title: z.string().min(1, "タイトルは必須です"),
+  description: z.string().optional(),
+  due_date: z.string().optional(),
+});
 
 interface CreateTaskDialogProps {
   projectId: string;
@@ -25,47 +26,40 @@ export const CreateTaskDialog = ({ projectId }: CreateTaskDialogProps) => {
   const [open, setOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const form = useForm<FormData>();
-
-  const { data: processes } = useQuery({
-    queryKey: ["processes", projectId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("processes")
-        .select("id, title")
-        .eq("project_id", projectId)
-        .order("order_index", { ascending: true });
-
-      if (error) throw error;
-      return data;
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      title: "",
+      description: "",
+      due_date: "",
     },
   });
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
     try {
       const { error } = await supabase
         .from("tasks")
         .insert({
           title: data.title,
-          description: data.description,
-          due_date: data.due_date,
+          description: data.description || null,
+          due_date: data.due_date || null,
           project_id: projectId,
-          process_id: data.process_id || null,
+          status: "pending",
         });
 
       if (error) throw error;
 
       toast({
-        title: "Success",
-        description: "Task created successfully.",
+        title: "タスクを作成しました",
       });
 
       setOpen(false);
+      form.reset();
       queryClient.invalidateQueries({ queryKey: ["project", projectId] });
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to create task. Please try again.",
+        title: "エラー",
+        description: "タスクの作成に失敗しました。",
         variant: "destructive",
       });
     }
@@ -118,30 +112,7 @@ export const CreateTaskDialog = ({ projectId }: CreateTaskDialogProps) => {
                 <FormItem>
                   <FormLabel className="text-sm font-medium text-gray-700">期限</FormLabel>
                   <FormControl>
-                    <Input type="datetime-local" className="border-gray-200" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="process_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm font-medium text-gray-700">工程</FormLabel>
-                  <FormControl>
-                    <select
-                      className="w-full border border-gray-200 rounded-md px-3 py-2"
-                      {...field}
-                    >
-                      <option value="">工程を選択</option>
-                      {processes?.map((process) => (
-                        <option key={process.id} value={process.id}>
-                          {process.title}
-                        </option>
-                      ))}
-                    </select>
+                    <Input type="date" className="border-gray-200" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

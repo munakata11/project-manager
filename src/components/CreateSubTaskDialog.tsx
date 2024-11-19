@@ -113,7 +113,7 @@ export const CreateSubTaskDialog = ({ projectId, parentTaskId }: CreateSubTaskDi
                 <FormItem>
                   <FormLabel className="text-sm font-medium text-gray-700">期限</FormLabel>
                   <FormControl>
-                    <Input type="datetime-local" className="border-gray-200" {...field} />
+                    <Input type="date" className="border-gray-200" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
