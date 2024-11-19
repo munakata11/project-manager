@@ -27,7 +27,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      setSession(session);
+      if (session?.expires_at && session.expires_at * 1000 < Date.now()) {
+        const { data, error } = await supabase.auth.refreshSession();
+        if (!error) {
+          setSession(data.session);
+        } else {
+          setSession(null);
+        }
+      } else {
+        setSession(session);
+      }
       setLoading(false);
     });
 
