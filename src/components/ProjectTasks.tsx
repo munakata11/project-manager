@@ -36,10 +36,11 @@ export function ProjectTasks({ project }: ProjectTasksProps) {
   const { data: dependencies } = useQuery({
     queryKey: ["process-dependencies", project.id],
     queryFn: async () => {
+      const processIds = sortedProcesses.map(p => p.id);
       const { data, error } = await supabase
         .from("process_dependencies")
         .select("*")
-        .eq("project_id", project.id);
+        .in("process_id", processIds);
 
       if (error) throw error;
       return data || [];
