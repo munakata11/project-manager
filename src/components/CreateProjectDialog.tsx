@@ -22,23 +22,12 @@ export const CreateProjectDialog = () => {
     defaultValues: {
       title: "",
       description: "",
-      design_period: new Date(), // デフォルト値を現在の日付に設定
       amount_excl_tax: 0,
       amount_incl_tax: 0,
-      contractor_company_id: "",
     },
   });
 
   const onSubmit = async (data: FormData) => {
-    if (!session?.user?.id) {
-      toast({
-        title: "エラー",
-        description: "ログインが必要です。",
-        variant: "destructive",
-      });
-      return;
-    }
-
     try {
       const { data: project, error } = await supabase
         .from("projects")
@@ -49,29 +38,19 @@ export const CreateProjectDialog = () => {
           amount_excl_tax: data.amount_excl_tax,
           amount_incl_tax: data.amount_incl_tax,
           contractor_company_id: data.contractor_company_id,
-          owner_id: session.user.id,
+          owner_id: session?.user?.id,
         })
         .select()
         .single();
 
-      if (error) {
-        console.error("Project creation error:", error);
-        throw error;
-      }
+      if (error) throw error;
 
       if (project) {
-        const { error: memberError } = await supabase
-          .from("project_members")
-          .insert({
-            project_id: project.id,
-            profile_id: session.user.id,
-            role: "owner",
-          });
-
-        if (memberError) {
-          console.error("Project member creation error:", memberError);
-          throw memberError;
-        }
+        await supabase.from("project_members").insert({
+          project_id: project.id,
+          profile_id: session?.user?.id,
+          role: "owner",
+        });
 
         toast({
           title: "成功",
@@ -82,7 +61,6 @@ export const CreateProjectDialog = () => {
         navigate(`/project/${project.id}`);
       }
     } catch (error) {
-      console.error("Error creating project:", error);
       toast({
         title: "エラー",
         description: "プロジェクトの作成に失敗しました。",
