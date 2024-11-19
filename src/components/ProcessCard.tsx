@@ -53,7 +53,7 @@ export const ProcessCard = ({ process, projectId }: ProcessCardProps) => {
     try {
       setIsUpdating(true);
       const newStatus = checked ? "完了" : "進行中";
-      const newPercentage = checked ? 100 : process.percentage || 0;
+      const newPercentage = checked ? 100 : process.percentage;
 
       const { error } = await supabase
         .from("processes")
@@ -98,16 +98,16 @@ export const ProcessCard = ({ process, projectId }: ProcessCardProps) => {
           <div className="flex-1">
             <div className="flex justify-between text-sm text-gray-600 mb-1">
               <span>進捗状況</span>
-              <span className="font-medium">{process.percentage !== null ? process.percentage : '未設定'}%</span>
+              <span className="font-medium">{process.percentage}%</span>
             </div>
             <Progress 
-              value={process.percentage !== null ? process.percentage : 0} 
+              value={process.percentage} 
               className="h-2.5 bg-gray-100" 
             />
             <div className="text-xs text-gray-500 mt-1">
-              <div>現在の進捗: {process.percentage !== null ? process.percentage : '未設定'}%</div>
+              <div>現在の進捗: {process.percentage}%</div>
               <div className="text-xs text-purple-600">
-                データベース値: {JSON.stringify(process.percentage)}
+                データベース値: {process.percentage}
               </div>
             </div>
           </div>
