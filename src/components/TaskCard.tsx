@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -87,27 +87,6 @@ export const TaskCard = ({ task, projectId, level = 0 }: TaskCardProps) => {
       setIsLoading(false);
     }
   };
-
-  useEffect(() => {
-    const channel = supabase
-      .channel('tasks_changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'tasks',
-        },
-        () => {
-          queryClient.invalidateQueries({ queryKey: ["project", projectId] });
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [projectId, queryClient]);
 
   return (
     <Card className={`bg-white border-gray-100 hover:border-purple-100 transition-colors ${level > 0 ? 'ml-8' : ''}`}>
