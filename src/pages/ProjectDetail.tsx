@@ -141,9 +141,8 @@ const ProjectDetail = () => {
     <div className="space-y-6">
       <ProjectHeader
         title={project.title}
-        description={project.description}
+        description={project.description || undefined}
         onDelete={() => deleteProjectMutation.mutate()}
-        onEdit={() => setIsEditDialogOpen(true)}
       />
 
       <ProjectOverview project={project} />
