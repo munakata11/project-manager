@@ -26,21 +26,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const fetchProfileData = async (userId: string) => {
       try {
-        const { data, error } = await supabase
+        const { data: profileData, error: profileError } = await supabase
           .from('profiles')
           .select('is_anonymous')
           .eq('id', userId)
           .single();
         
-        if (error) throw error;
-        setIsAnonymous(data?.is_anonymous || false);
+        if (profileError) {
+          console.error('Profile fetch error:', profileError);
+          // プロファイルが存在しない場合は作成を試みる
+          if (profileError.code === 'PGRST116') {
+            const { error: insertError } = await supabase
+              .from('profiles')
+              .insert({
+                id: userId,
+                is_anonymous: false,
+              });
+            
+            if (insertError) {
+              console.error('Profile creation error:', insertError);
+            }
+          }
+        } else {
+          setIsAnonymous(profileData?.is_anonymous || false);
+        }
       } catch (error) {
         console.error('Profile error:', error);
       }
       setLoading(false);
     };
 
-    // 初期セッションの取得
     supabase.auth.getSession().then(({ data: { session }, error }) => {
       if (error) {
         console.error('Session error:', error);
@@ -56,13 +71,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     });
 
-    // 認証状態の変更を監視
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       if (session?.user) {
         fetchProfileData(session.user.id);
       } else {
         setIsAnonymous(false);
+        setLoading(false);
       }
     });
 
