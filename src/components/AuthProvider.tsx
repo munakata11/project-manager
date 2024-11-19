@@ -30,26 +30,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           .from('profiles')
           .select('is_anonymous')
           .eq('id', userId)
-          .maybeSingle();
+          .single();
         
         if (profileError) {
-          console.error('Profile fetch error:', profileError);
-          return;
-        }
-
-        // プロフィールが存在しない場合は新規作成
-        if (!existingProfile) {
-          const { error: insertError } = await supabase
-            .from('profiles')
-            .insert([{ id: userId, is_anonymous: false }]);
-          
-          if (insertError) {
-            console.error('Profile creation error:', insertError);
+          if (profileError.code === 'PGRST116') {
+            // プロフィールが存在しない場合は新規作成
+            const { error: insertError } = await supabase
+              .from('profiles')
+              .insert([{ 
+                id: userId, 
+                is_anonymous: false,
+                full_name: session?.user?.user_metadata?.full_name || null
+              }]);
+            
+            if (insertError) {
+              console.error('Profile creation error:', insertError);
+              return;
+            }
+            setIsAnonymous(false);
+          } else {
+            console.error('Profile fetch error:', profileError);
             return;
           }
-          setIsAnonymous(false);
         } else {
-          setIsAnonymous(existingProfile.is_anonymous || false);
+          setIsAnonymous(existingProfile?.is_anonymous || false);
         }
       } catch (error) {
         console.error('Profile error:', error);
@@ -81,6 +85,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         fetchProfileData(session.user.id);
       } else {
         setIsAnonymous(false);
+        setLoading(false);
       }
     });
 
