@@ -15,15 +15,17 @@ import { zodResolver } from "@hookform/resolvers/zod";
 const formSchema = z.object({
   title: z.string().min(1, "タイトルは必須です"),
   description: z.string().optional(),
-  due_date: z.string().optional(),
 });
 
-interface CreateSubTaskDialogProps {
+interface SaveTaskTemplateDialogProps {
   projectId: string;
-  parentTaskId: string;
+  tasks: Array<{
+    title: string;
+    description: string | null;
+  }>;
 }
 
-export const CreateSubTaskDialog = ({ projectId, parentTaskId }: CreateSubTaskDialogProps) => {
+export const SaveTaskTemplateDialog = ({ projectId, tasks }: SaveTaskTemplateDialogProps) => {
   const [open, setOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -32,40 +34,48 @@ export const CreateSubTaskDialog = ({ projectId, parentTaskId }: CreateSubTaskDi
     defaultValues: {
       title: "",
       description: "",
-      due_date: "",
     },
   });
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     try {
-      const { data: newTask, error } = await supabase
-        .from("tasks")
+      const { data: template, error: templateError } = await supabase
+        .from("task_templates")
         .insert({
           title: data.title,
           description: data.description || null,
-          due_date: data.due_date || null,
           project_id: projectId,
-          parent_task_id: parentTaskId,
-          status: "進行中",
         })
         .select()
         .single();
 
-      if (error) throw error;
+      if (templateError) throw templateError;
+
+      const templateItems = tasks.map((task, index) => ({
+        template_id: template.id,
+        title: task.title,
+        description: task.description,
+        order_index: index,
+      }));
+
+      const { error: itemsError } = await supabase
+        .from("task_template_items")
+        .insert(templateItems);
+
+      if (itemsError) throw itemsError;
 
       toast({
-        title: "サブタスクを作成しました",
-        description: `${data.title}を追加しました`,
+        title: "テンプレートを作成しました",
+        description: "タスク一覧をテンプレートとして保存しました",
       });
 
       setOpen(false);
       form.reset();
-      queryClient.invalidateQueries({ queryKey: ["project", projectId] });
+      queryClient.invalidateQueries({ queryKey: ["task-templates", projectId] });
     } catch (error) {
-      console.error("Error creating subtask:", error);
       toast({
         title: "エラー",
-        description: "サブタスクの作成に失敗しました。",
+        description: "テンプレートの作成に失敗しました。",
         variant: "destructive",
       });
     }
@@ -74,15 +84,18 @@ export const CreateSubTaskDialog = ({ projectId, parentTaskId }: CreateSubTaskDi
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="outline" className="h-7">
-          <Plus className="w-3 h-3 mr-1" />
-          サブタスク
+        <Button size="sm" className="bg-purple-600 hover:bg-purple-700 text-white">
+          <Plus className="w-4 h-4 mr-2" />
+          テンプレートとして保存
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle className="text-lg font-semibold text-gray-900">サブタスクの追加</DialogTitle>
+          <DialogTitle className="text-lg font-semibold text-gray-900">タスク一覧をテンプレート化</DialogTitle>
         </DialogHeader>
+        <div className="text-sm text-gray-500 mb-4">
+          このタスク一覧をテンプレートとして保存すると、他のプロジェクトでも同じタスク一覧を簡単に作成できます。
+        </div>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
@@ -92,7 +105,7 @@ export const CreateSubTaskDialog = ({ projectId, parentTaskId }: CreateSubTaskDi
                 <FormItem>
                   <FormLabel className="text-sm font-medium text-gray-700">タイトル *</FormLabel>
                   <FormControl>
-                    <Input placeholder="サブタスクのタイトルを入力" className="border-gray-200" {...field} />
+                    <Input placeholder="テンプレートのタイトルを入力" className="border-gray-200" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -105,27 +118,14 @@ export const CreateSubTaskDialog = ({ projectId, parentTaskId }: CreateSubTaskDi
                 <FormItem>
                   <FormLabel className="text-sm font-medium text-gray-700">説明</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="サブタスクの説明を入力" className="border-gray-200" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="due_date"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm font-medium text-gray-700">期限</FormLabel>
-                  <FormControl>
-                    <Input type="date" className="border-gray-200" {...field} />
+                    <Textarea placeholder="テンプレートの説明を入力" className="border-gray-200" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
             <Button type="submit" className="w-full bg-purple-600 hover:bg-purple-700 text-white">
-              作成
+              保存
             </Button>
           </form>
         </Form>

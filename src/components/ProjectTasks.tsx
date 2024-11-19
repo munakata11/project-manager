@@ -2,6 +2,8 @@ import { useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CreateTaskDialog } from "@/components/CreateTaskDialog";
 import { TaskCard } from "@/components/TaskCard";
+import { SaveTaskTemplateDialog } from "@/components/SaveTaskTemplateDialog";
+import { ApplyTaskTemplateDialog } from "@/components/ApplyTaskTemplateDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -14,7 +16,7 @@ interface ProjectTasksProps {
 
 export function ProjectTasks({ project }: ProjectTasksProps) {
   const queryClient = useQueryClient();
-  const mainTasks = project.tasks?.filter(task => !task.parent_task_id) || [];
+  const tasks = project.tasks || [];
 
   useEffect(() => {
     const channel = supabase
@@ -45,12 +47,14 @@ export function ProjectTasks({ project }: ProjectTasksProps) {
           タスク
         </CardTitle>
         <div className="flex gap-2">
+          <ApplyTaskTemplateDialog projectId={project.id} />
+          <SaveTaskTemplateDialog projectId={project.id} tasks={tasks} />
           <CreateTaskDialog projectId={project.id} />
         </div>
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
-          {mainTasks.map((task) => (
+          {tasks.map((task) => (
             <TaskCard key={task.id} task={task} projectId={project.id} />
           ))}
         </div>
