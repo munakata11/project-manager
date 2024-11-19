@@ -1,14 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { Note } from "@/types/note";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
+import { Mic } from "lucide-react";
 
 const formSchema = z.object({
   title: z.string().min(1, "タイトルは必須です"),
@@ -18,67 +17,118 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 interface NoteFormProps {
-  note?: Note;
-  onSubmit: (data: FormData) => void;
+  noteTitle: string;
+  setNoteTitle: (title: string) => void;
+  content: string;
+  setContent: (content: string) => void;
+  useAITitle: boolean;
+  setUseAITitle: (useAI: boolean) => void;
+  files: File[];
+  setFiles: (files: File[]) => void;
+  onSubmit: (e: React.FormEvent) => Promise<void>;
   onCancel: () => void;
+  isLoading: boolean;
+  noteType: "meeting" | "call";
+  participants?: string;
+  setParticipants?: (participants: string) => void;
+  location?: string;
+  setLocation?: (location: string) => void;
+  contactPerson?: string;
+  setContactPerson?: (contactPerson: string) => void;
 }
 
-export function NoteForm({ note, onSubmit, onCancel }: NoteFormProps) {
-  const toast = useToast();
-  const form = useForm<FormData>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      title: note?.title || "",
-      content: note?.content || "",
-    },
-  });
+export function NoteForm({
+  noteTitle,
+  setNoteTitle,
+  content,
+  setContent,
+  useAITitle,
+  setUseAITitle,
+  files,
+  setFiles,
+  onSubmit,
+  onCancel,
+  isLoading,
+  noteType,
+  participants,
+  setParticipants,
+  location,
+  setLocation,
+  contactPerson,
+  setContactPerson,
+}: NoteFormProps) {
+  const { toast } = useToast();
 
   const { isRecording, toggleVoiceInput } = useSpeechRecognition((transcript) => {
-    setContent((prev: string) => prev + transcript);
+    setContent(content + transcript);
   });
 
-  const onSubmitHandler = async (data: FormData) => {
-    try {
-      await onSubmit(data);
-      toast({
-        title: "ノートが保存されました",
-      });
-    } catch (error) {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!content) {
       toast({
         title: "エラー",
-        description: "ノートの保存に失敗しました。",
+        description: "内容を入力してください",
         variant: "destructive",
       });
+      return;
     }
+    await onSubmit(e);
   };
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmitHandler)} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4">
       <Input
-        {...form.register("title")}
-        placeholder="タイトルを入力"
+        placeholder="タイトル"
+        value={noteTitle}
+        onChange={(e) => setNoteTitle(e.target.value)}
         className="border-gray-200"
       />
-      {form.formState.errors.title && (
-        <p className="text-red-500">{form.formState.errors.title.message}</p>
-      )}
       <Textarea
-        {...form.register("content")}
         placeholder="内容を入力"
-        className="border-gray-200"
+        value={content}
+        onChange={(e) => setContent(e.target.value)}
+        className="min-h-[200px] border-gray-200"
       />
-      {form.formState.errors.content && (
-        <p className="text-red-500">{form.formState.errors.content.message}</p>
+      {noteType === "meeting" && (
+        <>
+          <Input
+            placeholder="参加者"
+            value={participants}
+            onChange={(e) => setParticipants?.(e.target.value)}
+            className="border-gray-200"
+          />
+          <Input
+            placeholder="場所"
+            value={location}
+            onChange={(e) => setLocation?.(e.target.value)}
+            className="border-gray-200"
+          />
+        </>
+      )}
+      {noteType === "call" && (
+        <Input
+          placeholder="相手"
+          value={contactPerson}
+          onChange={(e) => setContactPerson?.(e.target.value)}
+          className="border-gray-200"
+        />
       )}
       <div className="flex justify-between">
         <Button type="button" onClick={onCancel} variant="ghost">
           キャンセル
         </Button>
-        <Button type="submit" className="bg-blue-600 text-white">
-          保存
-        </Button>
-        <Button type="button" onClick={toggleVoiceInput} className="bg-gray-300">
+        <Button
+          type="button"
+          onClick={toggleVoiceInput}
+          variant="outline"
+          className={`flex items-center gap-2 ${isRecording ? "text-blue-500" : ""}`}
+        >
+          <Mic className={`h-4 w-4 ${isRecording ? "text-blue-500" : ""}`} />
           {isRecording ? "停止" : "音声入力"}
+        </Button>
+        <Button type="submit" disabled={isLoading}>
+          保存
         </Button>
       </div>
     </form>
