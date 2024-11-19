@@ -21,11 +21,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { toast } = useToast();
 
   useEffect(() => {
+    // 既存のセッションを取得
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setLoading(false);
     });
 
+    // 認証状態の変更を監視
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -38,7 +40,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signInAnonymously = async () => {
     try {
-      // 一意のメールアドレスとパスワードを生成
       const uniqueId = crypto.randomUUID();
       const { error } = await supabase.auth.signUp({
         email: `${uniqueId}@example.com`,
