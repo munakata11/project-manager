@@ -26,18 +26,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const fetchProfileData = async (userId: string) => {
       try {
-        const { data, error } = await supabase
+        const { data: existingProfile, error: profileError } = await supabase
           .from('profiles')
           .select('is_anonymous')
           .eq('id', userId)
-          .single();
+          .maybeSingle();
         
-        if (error) throw error;
-        setIsAnonymous(data?.is_anonymous || false);
+        if (profileError) {
+          console.error('Profile fetch error:', profileError);
+          return;
+        }
+
+        // プロフィールが存在しない場合は新規作成
+        if (!existingProfile) {
+          const { error: insertError } = await supabase
+            .from('profiles')
+            .insert([{ id: userId, is_anonymous: false }]);
+          
+          if (insertError) {
+            console.error('Profile creation error:', insertError);
+            return;
+          }
+          setIsAnonymous(false);
+        } else {
+          setIsAnonymous(existingProfile.is_anonymous || false);
+        }
       } catch (error) {
         console.error('Profile error:', error);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     // 初期セッションの取得
