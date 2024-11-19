@@ -24,6 +24,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { toast } = useToast();
 
   useEffect(() => {
+    const fetchProfileData = async (userId: string) => {
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('is_anonymous')
+          .eq('id', userId)
+          .single();
+        
+        if (error) throw error;
+        setIsAnonymous(data?.is_anonymous || false);
+      } catch (error) {
+        console.error('Profile error:', error);
+      }
+      setLoading(false);
+    };
+
     // 初期セッションの取得
     supabase.auth.getSession().then(({ data: { session }, error }) => {
       if (error) {
@@ -34,20 +50,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       setSession(session);
       if (session?.user) {
-        // プロフィール情報の取得
-        supabase
-          .from('profiles')
-          .select('is_anonymous')
-          .eq('id', session.user.id)
-          .single()
-          .then(({ data }) => {
-            setIsAnonymous(data?.is_anonymous || false);
-            setLoading(false);
-          })
-          .catch((error) => {
-            console.error('Profile error:', error);
-            setLoading(false);
-          });
+        fetchProfileData(session.user.id);
       } else {
         setLoading(false);
       }
@@ -57,15 +60,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       if (session?.user) {
-        supabase
-          .from('profiles')
-          .select('is_anonymous')
-          .eq('id', session.user.id)
-          .single()
-          .then(({ data }) => {
-            setIsAnonymous(data?.is_anonymous || false);
-          })
-          .catch(console.error);
+        fetchProfileData(session.user.id);
       } else {
         setIsAnonymous(false);
       }
