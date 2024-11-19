@@ -83,7 +83,7 @@ export const ProcessCard = ({ process, projectId }: ProcessCardProps) => {
   };
 
   return (
-    <div className="space-y-3 bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+    <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
       <ProcessHeader
         process={process}
         status={process.status}
@@ -93,15 +93,18 @@ export const ProcessCard = ({ process, projectId }: ProcessCardProps) => {
         onDelete={handleDelete}
       />
 
-      <div className="space-y-4">
+      <div className="mt-4 space-y-4">
         <div className="flex items-center gap-2">
-          <Progress 
-            value={process.percentage} 
-            className="h-2 bg-gray-100 flex-1" 
-          />
-          <span className="text-sm font-medium text-gray-600 min-w-[3rem]">
-            {process.percentage}%
-          </span>
+          <div className="flex-1">
+            <div className="flex justify-between text-sm text-gray-600 mb-1">
+              <span>進捗状況</span>
+              <span>{process.percentage}%</span>
+            </div>
+            <Progress 
+              value={process.percentage} 
+              className="h-2 bg-gray-100" 
+            />
+          </div>
         </div>
 
         {process.description && (
