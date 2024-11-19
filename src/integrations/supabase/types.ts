@@ -6,6 +6,28 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
+export interface Profile {
+  id: string;
+  full_name: string | null;
+  avatar_url: string | null;
+  created_at: string;
+  is_anonymous: boolean;
+}
+
+export interface Project {
+  id: string;
+  title: string;
+  description: string | null;
+  status: string | null;
+  progress: number | null;
+  created_at: string;
+  owner_id: string;
+  design_period: string | null;
+  amount_excl_tax: number | null;
+  amount_incl_tax: number | null;
+  contractor_company_id: string | null;
+}
+
 export type Database = {
   public: {
     Tables: {
@@ -72,7 +94,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
-          },
+          }
         ]
       }
       meeting_notes: {
@@ -126,7 +148,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
-          },
+          }
         ]
       }
       process_dependencies: {
@@ -165,7 +187,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "processes"
             referencedColumns: ["id"]
-          },
+          }
         ]
       }
       process_template_items: {
@@ -200,7 +222,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "process_templates"
             referencedColumns: ["id"]
-          },
+          }
         ]
       }
       process_templates: {
@@ -242,7 +264,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
-          },
+          }
         ]
       }
       processes: {
@@ -296,7 +318,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "process_templates"
             referencedColumns: ["id"]
-          },
+          }
         ]
       }
       profiles: {
@@ -305,18 +327,21 @@ export type Database = {
           created_at: string
           full_name: string | null
           id: string
+          is_anonymous: boolean
         }
         Insert: {
           avatar_url?: string | null
           created_at?: string
           full_name?: string | null
           id: string
+          is_anonymous?: boolean
         }
         Update: {
           avatar_url?: string | null
           created_at?: string
           full_name?: string | null
           id?: string
+          is_anonymous?: boolean
         }
         Relationships: []
       }
@@ -365,7 +390,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
-          },
+          }
         ]
       }
       project_members: {
@@ -401,7 +426,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
-          },
+          }
         ]
       }
       project_urls: {
@@ -446,7 +471,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
-          },
+          }
         ]
       }
       projects: {
@@ -503,7 +528,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
-          },
+          }
         ]
       }
       task_template_items: {
@@ -538,7 +563,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "task_templates"
             referencedColumns: ["id"]
-          },
+          }
         ]
       }
       task_templates: {
@@ -580,7 +605,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
-          },
+          }
         ]
       }
       tasks: {
@@ -648,7 +673,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
-          },
+          }
         ]
       }
     }
