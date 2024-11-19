@@ -103,10 +103,21 @@ export const ApplyTaskTemplateDialog = ({ projectId }: ApplyTaskTemplateDialogPr
                 key={template.id}
                 className="p-4 border rounded-lg hover:border-purple-200 transition-colors"
               >
-                <h3 className="font-medium text-gray-900">{template.title}</h3>
-                {template.description && (
-                  <p className="mt-1 text-sm text-gray-500">{template.description}</p>
-                )}
+                <div className="flex justify-between items-start mb-3">
+                  <div>
+                    <h3 className="font-medium text-gray-900">{template.title}</h3>
+                    {template.description && (
+                      <p className="mt-1 text-sm text-gray-500">{template.description}</p>
+                    )}
+                  </div>
+                  <Button
+                    onClick={() => applyTemplate(template.id)}
+                    className="bg-purple-600 hover:bg-purple-700 text-white"
+                    size="sm"
+                  >
+                    適用
+                  </Button>
+                </div>
                 <div className="mt-3">
                   <h4 className="text-sm font-medium text-gray-700">タスク一覧:</h4>
                   <ul className="mt-2 space-y-1">
@@ -117,12 +128,6 @@ export const ApplyTaskTemplateDialog = ({ projectId }: ApplyTaskTemplateDialogPr
                     ))}
                   </ul>
                 </div>
-                <Button
-                  onClick={() => applyTemplate(template.id)}
-                  className="mt-4 w-full bg-purple-600 hover:bg-purple-700 text-white"
-                >
-                  このテンプレートを適用
-                </Button>
               </div>
             ))}
             {templates?.length === 0 && (
