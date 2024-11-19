@@ -18,8 +18,6 @@ const formSchema = z.object({
   due_date: z.string().optional(),
 });
 
-type FormData = z.infer<typeof formSchema>;
-
 interface CreateSubTaskDialogProps {
   projectId: string;
   parentTaskId: string;
@@ -29,7 +27,7 @@ export const CreateSubTaskDialog = ({ projectId, parentTaskId }: CreateSubTaskDi
   const [open, setOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const form = useForm<FormData>({
+  const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: "",
@@ -38,17 +36,16 @@ export const CreateSubTaskDialog = ({ projectId, parentTaskId }: CreateSubTaskDi
     },
   });
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
     try {
-      const { error } = await supabase
-        .from("tasks")
-        .insert({
-          title: data.title,
-          description: data.description || null,
-          due_date: data.due_date || null,
-          project_id: projectId,
-          parent_task_id: parentTaskId,
-        });
+      const { error } = await supabase.from("tasks").insert({
+        title: data.title,
+        description: data.description || null,
+        due_date: data.due_date || null,
+        project_id: projectId,
+        parent_task_id: parentTaskId,
+        status: "pending",
+      });
 
       if (error) throw error;
 
@@ -60,6 +57,7 @@ export const CreateSubTaskDialog = ({ projectId, parentTaskId }: CreateSubTaskDi
       form.reset();
       queryClient.invalidateQueries({ queryKey: ["project", projectId] });
     } catch (error) {
+      console.error("Error creating subtask:", error);
       toast({
         title: "エラー",
         description: "サブタスクの作成に失敗しました。",

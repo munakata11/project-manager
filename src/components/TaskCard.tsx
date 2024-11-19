@@ -85,7 +85,7 @@ export const TaskCard = ({ task, projectId, level = 0 }: TaskCardProps) => {
   };
 
   return (
-    <Card className="bg-white border-gray-100 hover:border-purple-100 transition-colors">
+    <Card className={`bg-white border-gray-100 hover:border-purple-100 transition-colors ${level > 0 ? 'ml-8' : ''}`}>
       <CardContent className="p-4">
         <div className="flex items-start justify-between">
           <div className="flex items-start gap-3 flex-1">
@@ -151,7 +151,7 @@ export const TaskCard = ({ task, projectId, level = 0 }: TaskCardProps) => {
           </div>
         </div>
         {isExpanded && task.subtasks && task.subtasks.length > 0 && (
-          <div className="mt-4 space-y-3 pl-8">
+          <div className="mt-4 space-y-3">
             {task.subtasks.map((subtask) => (
               <TaskCard
                 key={subtask.id}
