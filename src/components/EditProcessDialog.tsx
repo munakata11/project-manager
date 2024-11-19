@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -8,7 +8,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -21,20 +20,27 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-interface CreateProcessDialogProps {
+interface EditProcessDialogProps {
+  process: {
+    id: string;
+    title: string;
+    description: string | null;
+    percentage: number;
+  };
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   projectId: string;
 }
 
-export const CreateProcessDialog = ({ projectId }: CreateProcessDialogProps) => {
-  const [open, setOpen] = useState(false);
+export const EditProcessDialog = ({ process, open, onOpenChange, projectId }: EditProcessDialogProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      title: "",
-      description: "",
-      percentage: 20, // 初期値を20%に変更
+      title: process.title,
+      description: process.description || "",
+      percentage: process.percentage,
     },
   });
 
@@ -42,42 +48,35 @@ export const CreateProcessDialog = ({ projectId }: CreateProcessDialogProps) => 
     try {
       const { error } = await supabase
         .from("processes")
-        .insert({
+        .update({
           title: data.title,
           description: data.description || null,
-          project_id: projectId,
           percentage: data.percentage,
-        });
+        })
+        .eq("id", process.id);
 
       if (error) throw error;
 
       toast({
-        title: "工程を作成しました",
+        title: "工程を更新しました",
       });
 
-      setOpen(false);
-      form.reset();
+      onOpenChange(false);
       queryClient.invalidateQueries({ queryKey: ["project", projectId] });
     } catch (error) {
       toast({
         title: "エラー",
-        description: "工程の作成に失敗しました。",
+        description: "工程の更新に失敗しました。",
         variant: "destructive",
       });
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button size="sm" className="bg-purple-600 hover:bg-purple-700 text-white">
-          <Plus className="w-4 h-4 mr-2" />
-          工程追加
-        </Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle className="text-lg font-semibold text-gray-900">工程の追加</DialogTitle>
+          <DialogTitle className="text-lg font-semibold text-gray-900">工程の編集</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -127,7 +126,7 @@ export const CreateProcessDialog = ({ projectId }: CreateProcessDialogProps) => 
               )}
             />
             <Button type="submit" className="w-full bg-purple-600 hover:bg-purple-700 text-white">
-              作成
+              更新
             </Button>
           </form>
         </Form>

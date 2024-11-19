@@ -1,24 +1,33 @@
+import { useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
+import { Trash2, Edit } from "lucide-react";
+import { EditProcessDialog } from "./EditProcessDialog";
 
 interface ProcessHeaderProps {
-  title: string;
-  percentage: number;
+  process: {
+    id: string;
+    title: string;
+    description: string | null;
+    percentage: number;
+  };
   status: string | null;
   isUpdating: boolean;
+  projectId: string;
   onStatusChange: (checked: boolean) => void;
   onDelete: () => void;
 }
 
 export const ProcessHeader = ({
-  title,
-  percentage,
+  process,
   status,
   isUpdating,
+  projectId,
   onStatusChange,
   onDelete,
 }: ProcessHeaderProps) => {
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+
   return (
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-3">
@@ -28,15 +37,27 @@ export const ProcessHeader = ({
           disabled={isUpdating}
         />
         <div>
-          <h3 className="text-lg font-medium text-gray-900">{title}</h3>
+          <h3 className="text-lg font-medium text-gray-900">{process.title}</h3>
           <div className="text-sm text-gray-500">
-            進捗: {percentage}%
+            進捗: {process.percentage}%
           </div>
         </div>
       </div>
-      <Button variant="ghost" size="sm" onClick={onDelete}>
-        <Trash2 className="h-4 w-4 text-red-500" />
-      </Button>
+      <div className="flex gap-2">
+        <Button variant="ghost" size="sm" onClick={() => setIsEditDialogOpen(true)}>
+          <Edit className="h-4 w-4 text-gray-500" />
+        </Button>
+        <Button variant="ghost" size="sm" onClick={onDelete}>
+          <Trash2 className="h-4 w-4 text-red-500" />
+        </Button>
+      </div>
+
+      <EditProcessDialog
+        process={process}
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        projectId={projectId}
+      />
     </div>
   );
 };

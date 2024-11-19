@@ -84,10 +84,10 @@ export const ProcessCard = ({ process, projectId }: ProcessCardProps) => {
   return (
     <div className="space-y-3">
       <ProcessHeader
-        title={process.title}
-        percentage={process.percentage}
+        process={process}
         status={process.status}
         isUpdating={isUpdating}
+        projectId={projectId}
         onStatusChange={handleStatusChange}
         onDelete={handleDelete}
       />
