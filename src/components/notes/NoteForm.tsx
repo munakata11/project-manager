@@ -53,11 +53,11 @@ export function NoteForm({
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(e.target.files || []);
-    setFiles((prev: File[]) => [...prev, ...selectedFiles]);
+    setFiles(prev => [...prev, ...selectedFiles]);
   };
 
   const removeFile = (index: number) => {
-    setFiles((prev: File[]) => prev.filter((_, i) => i !== index));
+    setFiles(prev => prev.filter((_, i) => i !== index));
   };
 
   const toggleVoiceInput = () => {
@@ -78,11 +78,11 @@ export function NoteForm({
     newRecognition.continuous = true;
     newRecognition.interimResults = true;
 
-    newRecognition.onresult = (event) => {
+    newRecognition.onresult = (event: SpeechRecognitionEvent) => {
       const transcript = Array.from(event.results)
         .map(result => result[0].transcript)
         .join('');
-      setContent((prev) => prev + transcript);
+      setContent(content + transcript);
     };
 
     newRecognition.onend = () => {
