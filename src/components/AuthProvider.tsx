@@ -7,31 +7,57 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   signInAnonymously: () => Promise<void>;
+  isAnonymous: boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({
   session: null,
   loading: true,
   signInAnonymously: async () => {},
+  isAnonymous: false,
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isAnonymous, setIsAnonymous] = useState(false);
   const { toast } = useToast();
+
+  const checkIsAnonymous = async (userId: string) => {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('is_anonymous')
+      .eq('id', userId)
+      .single();
+    
+    if (error) {
+      console.error('Error checking anonymous status:', error);
+      return false;
+    }
+    
+    return data?.is_anonymous || false;
+  };
 
   useEffect(() => {
     // 既存のセッションを取得
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
+      if (session?.user) {
+        const isAnon = await checkIsAnonymous(session.user.id);
+        setIsAnonymous(isAnon);
+      }
       setLoading(false);
     });
 
     // 認証状態の変更を監視
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setSession(session);
+      if (session?.user) {
+        const isAnon = await checkIsAnonymous(session.user.id);
+        setIsAnonymous(isAnon);
+      }
       setLoading(false);
     });
 
@@ -47,6 +73,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         options: {
           data: {
             full_name: `匿名ユーザー_${uniqueId.slice(0, 8)}`,
+            is_anonymous: true,
           },
         },
       });
@@ -75,6 +102,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     session,
     loading,
     signInAnonymously,
+    isAnonymous,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
