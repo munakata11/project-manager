@@ -3,8 +3,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { FileUp } from "lucide-react";
+import { FileUp, Mic, MicOff } from "lucide-react";
 import { FileList } from "./FileList";
+import { useState } from "react";
 
 interface NoteFormProps {
   noteTitle: string;
@@ -47,6 +48,9 @@ export function NoteForm({
   contactPerson,
   setContactPerson,
 }: NoteFormProps) {
+  const [isRecording, setIsRecording] = useState(false);
+  const [recognition, setRecognition] = useState<SpeechRecognition | null>(null);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(e.target.files || []);
     setFiles((prev: File[]) => [...prev, ...selectedFiles]);
@@ -54,6 +58,40 @@ export function NoteForm({
 
   const removeFile = (index: number) => {
     setFiles((prev: File[]) => prev.filter((_, i) => i !== index));
+  };
+
+  const toggleVoiceInput = () => {
+    if (isRecording) {
+      recognition?.stop();
+      setIsRecording(false);
+      return;
+    }
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert('お使いのブラウザは音声入力に対応していません。');
+      return;
+    }
+
+    const newRecognition = new SpeechRecognition();
+    newRecognition.lang = 'ja-JP';
+    newRecognition.continuous = true;
+    newRecognition.interimResults = true;
+
+    newRecognition.onresult = (event) => {
+      const transcript = Array.from(event.results)
+        .map(result => result[0].transcript)
+        .join('');
+      setContent((prev) => prev + transcript);
+    };
+
+    newRecognition.onend = () => {
+      setIsRecording(false);
+    };
+
+    newRecognition.start();
+    setRecognition(newRecognition);
+    setIsRecording(true);
   };
 
   return (
@@ -112,7 +150,7 @@ export function NoteForm({
         </>
       )}
 
-      <div className="space-y-2">
+      <div className="space-y-2 relative">
         <Textarea
           placeholder="内容"
           value={content}
@@ -120,6 +158,15 @@ export function NoteForm({
           required
           className="min-h-[200px]"
         />
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          className={`absolute bottom-2 left-2 ${isRecording ? 'bg-red-500 hover:bg-red-600 text-white' : ''}`}
+          onClick={toggleVoiceInput}
+        >
+          {isRecording ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+        </Button>
       </div>
 
       {noteType === "meeting" && (
