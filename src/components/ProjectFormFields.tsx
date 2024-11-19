@@ -14,9 +14,7 @@ import * as z from "zod";
 const formSchema = z.object({
   title: z.string().min(1, "プロジェクト名は必須です"),
   description: z.string().optional(),
-  design_period: z.date({
-    required_error: "設計工期は必須です",
-  }),
+  design_period: z.date().nullable(),
   amount_excl_tax: z.number().min(0, "0以上の数値を入力してください"),
   amount_incl_tax: z.number().min(0, "0以上の数値を入力してください"),
   contractor_company_id: z.string().min(1, "受注会社は必須です"),
@@ -94,34 +92,44 @@ export function ProjectFormFields({ form }: ProjectFormFieldsProps) {
         render={({ field }) => (
           <FormItem>
             <FormLabel>設計工期</FormLabel>
-            <Popover>
-              <PopoverTrigger asChild>
-                <FormControl>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full pl-3 text-left font-normal",
-                      !field.value && "text-muted-foreground"
-                    )}
-                  >
-                    {field.value ? (
-                      format(field.value, "yyyy年MM月dd日")
-                    ) : (
-                      <span>日付を選択</span>
-                    )}
-                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                  </Button>
-                </FormControl>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={field.value}
-                  onSelect={field.onChange}
-                  disabled={(date) => date < new Date()}
-                />
-              </PopoverContent>
-            </Popover>
+            <div className="flex gap-2">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full pl-3 text-left font-normal",
+                        !field.value && "text-muted-foreground"
+                      )}
+                    >
+                      {field.value ? (
+                        format(field.value, "yyyy年MM月dd日")
+                      ) : (
+                        <span>日付を選択</span>
+                      )}
+                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={field.value || undefined}
+                    onSelect={field.onChange}
+                    disabled={(date) => date < new Date()}
+                  />
+                </PopoverContent>
+              </Popover>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => field.onChange(null)}
+                className="shrink-0"
+              >
+                未定
+              </Button>
+            </div>
             <FormMessage />
           </FormItem>
         )}

@@ -26,15 +26,15 @@ export function ProjectOverview({ project }: ProjectOverviewProps) {
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle className="text-lg font-semibold">プロジェクト概要</CardTitle>
         <Button
-          variant="outline"
+          variant="ghost"
           size="sm"
           onClick={() => setIsEditDialogOpen(true)}
+          className="h-8 w-8 p-0"
         >
-          <Edit className="h-4 w-4 mr-2" />
-          編集
+          <Edit className="h-4 w-4" />
         </Button>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -46,7 +46,7 @@ export function ProjectOverview({ project }: ProjectOverviewProps) {
                 ? format(new Date(project.design_period), "yyyy年MM月dd日", {
                     locale: ja,
                   })
-                : "未設定"}
+                : "未定"}
             </p>
           </div>
           <div>

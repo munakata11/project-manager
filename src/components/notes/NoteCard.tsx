@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Edit, Trash2 } from "lucide-react";
 import { Note } from "@/types/note";
 import { NoteAttachments } from "./NoteAttachments";
+import { Separator } from "@/components/ui/separator";
 
 interface NoteCardProps {
   note: Note;
@@ -15,18 +16,18 @@ export function NoteCard({ note, onEdit, onDelete, onFormat }: NoteCardProps) {
   return (
     <Card key={note.id} className="border-gray-100">
       <CardContent className="p-4">
-        <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center justify-between mb-4">
           <h3 className="font-medium text-gray-900">{note.title}</h3>
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-500">
               {new Date(note.created_at).toLocaleDateString("ja-JP")}
             </span>
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
               onClick={() => onFormat(note)}
               title="整形"
-              className="bg-white"
+              className="text-gray-500 hover:text-gray-700"
             >
               整形
             </Button>
@@ -48,30 +49,40 @@ export function NoteCard({ note, onEdit, onDelete, onFormat }: NoteCardProps) {
             </Button>
           </div>
         </div>
-        {note.note_type === "call" && note.contact_person && (
-          <p className="text-sm text-gray-600 mb-2">
-            相手: {note.contact_person}
-          </p>
-        )}
-        {note.note_type === "meeting" && (
-          <>
-            {note.participants && (
-              <p className="text-sm text-gray-600">
-                参加者: {note.participants}
-              </p>
-            )}
-            {note.location && (
-              <p className="text-sm text-gray-600">
-                場所: {note.location}
-              </p>
-            )}
-          </>
-        )}
-        <p className="text-gray-600 whitespace-pre-wrap mt-2">
+
+        <div className="bg-gray-50 rounded-lg p-3 mb-4">
+          {note.note_type === "call" && note.contact_person && (
+            <p className="text-sm text-gray-600 mb-2">
+              <span className="font-medium">相手:</span> {note.contact_person}
+            </p>
+          )}
+          {note.note_type === "meeting" && (
+            <>
+              {note.participants && (
+                <p className="text-sm text-gray-600 mb-2">
+                  <span className="font-medium">参加者:</span> {note.participants}
+                </p>
+              )}
+              {note.location && (
+                <p className="text-sm text-gray-600">
+                  <span className="font-medium">場所:</span> {note.location}
+                </p>
+              )}
+            </>
+          )}
+        </div>
+
+        <Separator className="my-4" />
+
+        <p className="text-gray-600 whitespace-pre-wrap">
           {note.content}
         </p>
+
         {note.note_type === "meeting" && note.meeting_note_attachments && (
-          <NoteAttachments noteId={note.id} attachments={note.meeting_note_attachments} />
+          <>
+            <Separator className="my-4" />
+            <NoteAttachments noteId={note.id} attachments={note.meeting_note_attachments} />
+          </>
         )}
       </CardContent>
     </Card>
