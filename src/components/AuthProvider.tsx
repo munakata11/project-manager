@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "./ui/use-toast";
 
 interface AuthContextType {
   session: Session | null;
@@ -17,6 +18,7 @@ const AuthContext = createContext<AuthContextType>({
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -40,7 +42,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         email: 'anonymous@example.com',
         password: 'anonymous',
       });
-      if (error) throw error;
+      
+      if (error) {
+        toast({
+          title: "エラー",
+          description: "匿名ログインに失敗しました",
+          variant: "destructive",
+        });
+        throw error;
+      }
+
+      toast({
+        title: "匿名ログインしました",
+      });
     } catch (error) {
       console.error('Error signing in anonymously:', error);
     }

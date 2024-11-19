@@ -1,20 +1,9 @@
-import { useEffect } from "react";
-import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import { Mic } from "lucide-react";
-
-const formSchema = z.object({
-  title: z.string().min(1, "タイトルは必須です"),
-  content: z.string().min(1, "内容は必須です"),
-});
-
-type FormData = z.infer<typeof formSchema>;
+import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 
 interface NoteFormProps {
   noteTitle: string;
@@ -58,7 +47,6 @@ export function NoteForm({
   setContactPerson,
 }: NoteFormProps) {
   const { toast } = useToast();
-
   const { isRecording, toggleVoiceInput } = useSpeechRecognition((transcript) => {
     setContent(content + transcript);
   });
@@ -84,12 +72,7 @@ export function NoteForm({
         onChange={(e) => setNoteTitle(e.target.value)}
         className="border-gray-200"
       />
-      <Textarea
-        placeholder="内容を入力"
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
-        className="min-h-[200px] border-gray-200"
-      />
+      
       {noteType === "meeting" && (
         <>
           <Input
@@ -106,6 +89,7 @@ export function NoteForm({
           />
         </>
       )}
+      
       {noteType === "call" && (
         <Input
           placeholder="相手"
@@ -114,6 +98,16 @@ export function NoteForm({
           className="border-gray-200"
         />
       )}
+
+      <div className="space-y-2">
+        <Textarea
+          placeholder="内容を入力"
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          className="min-h-[200px] border-gray-200"
+        />
+      </div>
+
       <div className="flex justify-between">
         <Button type="button" onClick={onCancel} variant="ghost">
           キャンセル
