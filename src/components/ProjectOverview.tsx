@@ -1,68 +1,88 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { CalendarDays, Building2 } from "lucide-react";
 import { format } from "date-fns";
+import { ja } from "date-fns/locale";
+import { Button } from "@/components/ui/button";
+import { Edit } from "lucide-react";
+import { useState } from "react";
+import { EditProjectDialog } from "./EditProjectDialog";
 
 interface ProjectOverviewProps {
   project: {
+    id: string;
     title: string;
-    description: string;
-    progress: number;
-    created_at: string;
-    design_period: string;
-    amount_excl_tax: number;
-    amount_incl_tax: number;
-    contractor_company_name?: string;
+    description: string | null;
+    design_period: string | null;
+    amount_excl_tax: number | null;
+    amount_incl_tax: number | null;
+    contractor_company_id: string | null;
+    contractor_companies?: {
+      name: string;
+    } | null;
   };
 }
 
 export function ProjectOverview({ project }: ProjectOverviewProps) {
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+
   return (
-    <Card className="w-full bg-white border-gray-100">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg font-semibold text-gray-900">
-          概要
-        </CardTitle>
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <CardTitle className="text-lg font-semibold">プロジェクト概要</CardTitle>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setIsEditDialogOpen(true)}
+        >
+          <Edit className="h-4 w-4 mr-2" />
+          編集
+        </Button>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
+      <CardContent className="space-y-4">
+        <div className="grid grid-cols-2 gap-4">
           <div>
-            <div className="flex justify-between text-sm text-gray-500 mb-1.5">
-              <span>進捗</span>
-              <span>{project.progress}%</span>
-            </div>
-            <Progress value={project.progress} className="h-2 bg-gray-100" />
+            <h3 className="text-sm font-medium text-gray-500">設計工期</h3>
+            <p className="mt-1">
+              {project.design_period
+                ? format(new Date(project.design_period), "yyyy年MM月dd日", {
+                    locale: ja,
+                  })
+                : "未設定"}
+            </p>
           </div>
-
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 text-sm text-gray-500">
-              <CalendarDays className="h-4 w-4 text-gray-400" />
-              <span>
-                作成日: {new Date(project.created_at).toLocaleDateString("ja-JP")}
-              </span>
-            </div>
-            
-            <div className="flex items-center gap-2 text-sm text-gray-500">
-              <CalendarDays className="h-4 w-4 text-gray-400" />
-              <span>
-                設計工期: {project.design_period ? format(new Date(project.design_period), "yyyy年MM月dd日") : "未設定"}
-              </span>
-            </div>
-
-            {project.contractor_company_name && (
-              <div className="flex items-center gap-2 text-sm text-gray-500">
-                <Building2 className="h-4 w-4 text-gray-400" />
-                <span>受注会社: {project.contractor_company_name}</span>
-              </div>
-            )}
-
-            <div className="text-sm text-gray-500">
-              <div>受注金額（税抜）: {project.amount_excl_tax?.toLocaleString()}円</div>
-              <div>受注金額（税込）: {project.amount_incl_tax?.toLocaleString()}円</div>
-            </div>
+          <div>
+            <h3 className="text-sm font-medium text-gray-500">受注会社</h3>
+            <p className="mt-1">
+              {project.contractor_companies?.name || "未設定"}
+            </p>
+          </div>
+          <div>
+            <h3 className="text-sm font-medium text-gray-500">受注金額（税抜）</h3>
+            <p className="mt-1">
+              {project.amount_excl_tax
+                ? `¥${project.amount_excl_tax.toLocaleString()}`
+                : "未設定"}
+            </p>
+          </div>
+          <div>
+            <h3 className="text-sm font-medium text-gray-500">受注金額（税込）</h3>
+            <p className="mt-1">
+              {project.amount_incl_tax
+                ? `¥${project.amount_incl_tax.toLocaleString()}`
+                : "未設定"}
+            </p>
           </div>
         </div>
+        <div>
+          <h3 className="text-sm font-medium text-gray-500">説明</h3>
+          <p className="mt-1 whitespace-pre-wrap">{project.description || "未設定"}</p>
+        </div>
       </CardContent>
+
+      <EditProjectDialog
+        project={project}
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+      />
     </Card>
   );
 }

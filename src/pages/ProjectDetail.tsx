@@ -78,7 +78,6 @@ const ProjectDetail = () => {
         (payload) => {
           queryClient.invalidateQueries({ queryKey: ["projects"] });
           queryClient.invalidateQueries({ queryKey: ["project", projectId] });
-          queryClient.invalidateQueries({ queryKey: ["sidebar-projects"] });
         }
       )
       .subscribe();
@@ -147,10 +146,7 @@ const ProjectDetail = () => {
         onEdit={() => setIsEditDialogOpen(true)}
       />
 
-      <ProjectOverview project={{
-        ...project,
-        contractor_company_name: project.contractor_companies?.name
-      }} />
+      <ProjectOverview project={project} />
 
       <Tabs defaultValue="tasks" className="w-full">
         <TabsList>
@@ -179,6 +175,6 @@ const ProjectDetail = () => {
       />
     </div>
   );
-};
+}
 
 export default ProjectDetail;

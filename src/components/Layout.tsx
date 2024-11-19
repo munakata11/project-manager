@@ -1,18 +1,17 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import {
-  LayoutDashboard,
-  LogOut,
-} from "lucide-react";
+import { LayoutDashboard, LogOut } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./AuthProvider";
+import { useEffect } from "react";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { session } = useAuth();
+  const queryClient = useQueryClient();
 
   const { data: projects } = useQuery({
     queryKey: ["projects"],
@@ -26,6 +25,27 @@ export function Layout({ children }: { children: React.ReactNode }) {
       return data;
     },
   });
+
+  useEffect(() => {
+    const channel = supabase
+      .channel('projects_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'projects',
+        },
+        (payload) => {
+          queryClient.invalidateQueries({ queryKey: ["projects"] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
