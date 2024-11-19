@@ -53,7 +53,7 @@ export const ProcessCard = ({ process, projectId }: ProcessCardProps) => {
     try {
       setIsUpdating(true);
       const newStatus = checked ? "完了" : "進行中";
-      const newPercentage = checked ? 100 : 0;
+      const newPercentage = checked ? 100 : process.percentage;
 
       const { error } = await supabase
         .from("processes")
@@ -83,7 +83,7 @@ export const ProcessCard = ({ process, projectId }: ProcessCardProps) => {
   };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 bg-white p-4 rounded-lg shadow-sm border border-gray-100">
       <ProcessHeader
         process={process}
         status={process.status}
@@ -93,14 +93,19 @@ export const ProcessCard = ({ process, projectId }: ProcessCardProps) => {
         onDelete={handleDelete}
       />
 
-      <div className="px-4">
-        <div className="flex items-center gap-2 mb-3">
-          <Progress value={process.percentage} className="flex-1" />
-          <span className="text-sm text-gray-500">{process.percentage}%</span>
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <Progress 
+            value={process.percentage} 
+            className="h-2 bg-gray-100 flex-1" 
+          />
+          <span className="text-sm font-medium text-gray-600 min-w-[3rem]">
+            {process.percentage}%
+          </span>
         </div>
 
         {process.description && (
-          <p className="text-sm text-gray-500 mb-3">{process.description}</p>
+          <p className="text-sm text-gray-500">{process.description}</p>
         )}
 
         <div className="space-y-3">
