@@ -41,6 +41,9 @@ const ProjectDetail = () => {
             title,
             description,
             status,
+            percentage,
+            order_index,
+            duration_days,
             tasks (
               *,
               assignee:profiles (
