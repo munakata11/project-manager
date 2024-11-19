@@ -44,7 +44,7 @@ export const CreateSubTaskDialog = ({ projectId, parentTaskId }: CreateSubTaskDi
         due_date: data.due_date || null,
         project_id: projectId,
         parent_task_id: parentTaskId,
-        status: "pending",
+        status: "進行中",
       });
 
       if (error) throw error;

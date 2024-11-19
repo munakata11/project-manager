@@ -44,7 +44,7 @@ export const CreateTaskDialog = ({ projectId }: CreateTaskDialogProps) => {
           description: data.description || null,
           due_date: data.due_date || null,
           project_id: projectId,
-          status: "pending",
+          status: "進行中",
         });
 
       if (error) throw error;
