@@ -5,7 +5,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { FileUp, Mic, MicOff } from "lucide-react";
 import { FileList } from "./FileList";
-import { useState } from "react";
+import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 
 interface NoteFormProps {
   noteTitle: string;
@@ -48,9 +48,6 @@ export function NoteForm({
   contactPerson,
   setContactPerson,
 }: NoteFormProps) {
-  const [isRecording, setIsRecording] = useState(false);
-  const [recognition, setRecognition] = useState<SpeechRecognition | null>(null);
-
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(e.target.files || []);
     setFiles(prev => [...prev, ...selectedFiles]);
@@ -60,39 +57,9 @@ export function NoteForm({
     setFiles(prev => prev.filter((_, i) => i !== index));
   };
 
-  const toggleVoiceInput = () => {
-    if (isRecording) {
-      recognition?.stop();
-      setIsRecording(false);
-      return;
-    }
-
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      alert('お使いのブラウザは音声入力に対応していません。');
-      return;
-    }
-
-    const newRecognition = new SpeechRecognition();
-    newRecognition.lang = 'ja-JP';
-    newRecognition.continuous = true;
-    newRecognition.interimResults = true;
-
-    newRecognition.onresult = (event: SpeechRecognitionEvent) => {
-      const transcript = Array.from(event.results)
-        .map(result => result[0].transcript)
-        .join('');
-      setContent(content + transcript);
-    };
-
-    newRecognition.onend = () => {
-      setIsRecording(false);
-    };
-
-    newRecognition.start();
-    setRecognition(newRecognition);
-    setIsRecording(true);
-  };
+  const { isRecording, toggleVoiceInput } = useSpeechRecognition((transcript) => {
+    setContent(content + transcript);
+  });
 
   return (
     <form onSubmit={onSubmit} className="space-y-4">
