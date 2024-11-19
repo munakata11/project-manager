@@ -53,7 +53,7 @@ export const ProcessCard = ({ process, projectId }: ProcessCardProps) => {
     try {
       setIsUpdating(true);
       const newStatus = checked ? "完了" : "進行中";
-      const newPercentage = checked ? 100 : process.percentage;
+      const newPercentage = checked ? 100 : calculateTaskProgress();
 
       const { error } = await supabase
         .from("processes")
@@ -82,12 +82,14 @@ export const ProcessCard = ({ process, projectId }: ProcessCardProps) => {
     }
   };
 
-  // 進捗状況の値を安全に取得する関数
-  const getPercentage = () => {
-    if (typeof process.percentage === 'number') {
-      return process.percentage;
-    }
-    return 0;
+  // タスクの進捗を計算する関数
+  const calculateTaskProgress = () => {
+    const totalTasks = process.tasks.length;
+    if (totalTasks === 0) return 0;
+    
+    const completedTasks = process.tasks.filter(task => task.status === "完了").length;
+    const progressPerTask = 100 / totalTasks;
+    return Math.round(completedTasks * progressPerTask);
   };
 
   return (
@@ -106,18 +108,12 @@ export const ProcessCard = ({ process, projectId }: ProcessCardProps) => {
           <div className="flex-1">
             <div className="flex justify-between text-sm text-gray-600 mb-1">
               <span>進捗状況</span>
-              <span className="font-medium">{getPercentage()}%</span>
+              <span className="font-medium">{calculateTaskProgress()}%</span>
             </div>
             <Progress 
-              value={getPercentage()} 
+              value={calculateTaskProgress()} 
               className="h-2.5 bg-gray-100" 
             />
-            <div className="text-xs text-gray-500 mt-1">
-              <div>現在の進捗: {getPercentage()}%</div>
-              <div className="text-xs text-purple-600">
-                データベース値: {getPercentage()}
-              </div>
-            </div>
           </div>
         </div>
 
