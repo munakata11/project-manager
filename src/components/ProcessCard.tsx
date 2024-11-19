@@ -97,13 +97,16 @@ export const ProcessCard = ({ process, projectId }: ProcessCardProps) => {
         <div className="flex items-center gap-2">
           <div className="flex-1">
             <div className="flex justify-between text-sm text-gray-600 mb-1">
-              <span>進捗</span>
-              <span>{process.percentage || 0}%</span>
+              <span>進捗状況</span>
+              <span className="font-medium">{process.percentage || 0}%</span>
             </div>
             <Progress 
               value={process.percentage || 0} 
-              className="h-2 bg-gray-100" 
+              className="h-2.5 bg-gray-100" 
             />
+            <div className="text-xs text-gray-500 mt-1">
+              現在の進捗: {process.percentage || 0}%
+            </div>
           </div>
         </div>
 
