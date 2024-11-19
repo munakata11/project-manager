@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { TaskCard } from "./TaskCard";
 import { useQueryClient } from "@tanstack/react-query";
 import { ProcessHeader } from "./ProcessHeader";
+import { Progress } from "@/components/ui/progress";
 
 interface ProcessCardProps {
   process: {
@@ -92,14 +93,21 @@ export const ProcessCard = ({ process, projectId }: ProcessCardProps) => {
         onDelete={handleDelete}
       />
 
-      {process.description && (
-        <p className="text-sm text-gray-500">{process.description}</p>
-      )}
+      <div className="px-4">
+        <div className="flex items-center gap-2 mb-3">
+          <Progress value={process.percentage} className="flex-1" />
+          <span className="text-sm text-gray-500">{process.percentage}%</span>
+        </div>
 
-      <div className="space-y-3">
-        {process.tasks?.map((task) => (
-          <TaskCard key={task.id} task={task} projectId={projectId} />
-        ))}
+        {process.description && (
+          <p className="text-sm text-gray-500 mb-3">{process.description}</p>
+        )}
+
+        <div className="space-y-3">
+          {process.tasks?.map((task) => (
+            <TaskCard key={task.id} task={task} projectId={projectId} />
+          ))}
+        </div>
       </div>
     </div>
   );

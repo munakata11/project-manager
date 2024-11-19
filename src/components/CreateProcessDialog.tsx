@@ -34,12 +34,22 @@ export const CreateProcessDialog = ({ projectId }: CreateProcessDialogProps) => 
     defaultValues: {
       title: "",
       description: "",
-      percentage: 20, // 初期値を20%に変更
+      percentage: 20,
     },
   });
 
   const onSubmit = async (data: FormData) => {
     try {
+      // 最後のプロセスの order_index を取得
+      const { data: processes } = await supabase
+        .from("processes")
+        .select("order_index")
+        .eq("project_id", projectId)
+        .order("order_index", { ascending: false })
+        .limit(1);
+
+      const nextOrderIndex = processes && processes.length > 0 ? processes[0].order_index + 1 : 0;
+
       const { error } = await supabase
         .from("processes")
         .insert({
@@ -47,6 +57,7 @@ export const CreateProcessDialog = ({ projectId }: CreateProcessDialogProps) => 
           description: data.description || null,
           project_id: projectId,
           percentage: data.percentage,
+          order_index: nextOrderIndex,
         });
 
       if (error) throw error;
