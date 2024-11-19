@@ -23,67 +23,53 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isAnonymous, setIsAnonymous] = useState(false);
   const { toast } = useToast();
 
-  const checkIsAnonymous = async (userId: string) => {
-    if (!userId) return false;
-    
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('is_anonymous')
-        .eq('id', userId)
-        .single();
-      
-      if (error) throw error;
-      return data?.is_anonymous || false;
-    } catch (error) {
-      console.error('Error in checkIsAnonymous:', error);
-      return false;
-    }
-  };
-
   useEffect(() => {
-    const initializeAuth = async () => {
-      try {
-        const { data: { session: initialSession }, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          console.error('Session initialization error:', error);
-          setLoading(false);
-          return;
-        }
-
-        if (initialSession?.user) {
-          const isAnon = await checkIsAnonymous(initialSession.user.id);
-          setSession(initialSession);
-          setIsAnonymous(isAnon);
-        }
-      } catch (error) {
-        console.error('Auth initialization error:', error);
-      } finally {
+    // 初期セッションの取得
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (error) {
+        console.error('Session error:', error);
+        setLoading(false);
+        return;
+      }
+      
+      setSession(session);
+      if (session?.user) {
+        // プロフィール情報の取得
+        supabase
+          .from('profiles')
+          .select('is_anonymous')
+          .eq('id', session.user.id)
+          .single()
+          .then(({ data }) => {
+            setIsAnonymous(data?.is_anonymous || false);
+            setLoading(false);
+          })
+          .catch((error) => {
+            console.error('Profile error:', error);
+            setLoading(false);
+          });
+      } else {
         setLoading(false);
       }
-    };
+    });
 
-    initializeAuth();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, currentSession) => {
-        try {
-          if (currentSession?.user) {
-            const isAnon = await checkIsAnonymous(currentSession.user.id);
-            setSession(currentSession);
-            setIsAnonymous(isAnon);
-          } else {
-            setSession(null);
-            setIsAnonymous(false);
-          }
-        } catch (error) {
-          console.error('Auth state change error:', error);
-        } finally {
-          setLoading(false);
-        }
+    // 認証状態の変更を監視
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      if (session?.user) {
+        supabase
+          .from('profiles')
+          .select('is_anonymous')
+          .eq('id', session.user.id)
+          .single()
+          .then(({ data }) => {
+            setIsAnonymous(data?.is_anonymous || false);
+          })
+          .catch(console.error);
+      } else {
+        setIsAnonymous(false);
       }
-    );
+    });
 
     return () => {
       subscription.unsubscribe();
