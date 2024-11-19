@@ -38,16 +38,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signInAnonymously = async () => {
     try {
-      // 一意のメールアドレスとパスワードを生成
-      const uniqueId = crypto.randomUUID();
-      const { error } = await supabase.auth.signUp({
-        email: `${uniqueId}@anonymous.supabase.co`,
-        password: uniqueId,
-        options: {
-          data: {
-            full_name: `匿名ユーザー_${uniqueId.slice(0, 8)}`,
-          },
-        },
+      const { error } = await supabase.auth.signInWithPassword({
+        email: 'anonymous@example.com',
+        password: 'anonymous',
       });
       
       if (error) {
