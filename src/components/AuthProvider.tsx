@@ -41,7 +41,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // 一意のメールアドレスとパスワードを生成
       const uniqueId = crypto.randomUUID();
       const { error } = await supabase.auth.signUp({
-        email: `anonymous.${uniqueId}@gmail.com`,
+        email: `${uniqueId}@example.com`,
         password: uniqueId,
         options: {
           data: {
@@ -51,9 +51,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
       
       if (error) {
+        console.error('匿名ログインエラー:', error);
         toast({
           title: "エラー",
-          description: "匿名ログインに失敗しました",
+          description: error.message === "Email address cannot be used as it is not authorized" 
+            ? "現在システムメンテナンス中です。しばらくしてから再度お試しください。"
+            : "匿名ログインに失敗しました。",
           variant: "destructive",
         });
         throw error;
