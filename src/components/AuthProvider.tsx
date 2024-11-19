@@ -24,44 +24,69 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { toast } = useToast();
 
   const checkIsAnonymous = async (userId: string) => {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('is_anonymous')
-      .eq('id', userId)
-      .single();
-    
-    if (error) {
-      console.error('Error checking anonymous status:', error);
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('is_anonymous')
+        .eq('id', userId)
+        .single();
+      
+      if (error) {
+        console.error('Error checking anonymous status:', error);
+        return false;
+      }
+      
+      return data?.is_anonymous || false;
+    } catch (error) {
+      console.error('Error in checkIsAnonymous:', error);
       return false;
     }
-    
-    return data?.is_anonymous || false;
   };
 
   useEffect(() => {
-    // 既存のセッションを取得
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      setSession(session);
-      if (session?.user) {
-        const isAnon = await checkIsAnonymous(session.user.id);
-        setIsAnonymous(isAnon);
+    let mounted = true;
+
+    const initialize = async () => {
+      try {
+        // 既存のセッションを取得
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (mounted) {
+          setSession(session);
+          if (session?.user) {
+            const isAnon = await checkIsAnonymous(session.user.id);
+            setIsAnonymous(isAnon);
+          }
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error('Error initializing auth:', error);
+        if (mounted) {
+          setLoading(false);
+        }
       }
-      setLoading(false);
-    });
+    };
+
+    initialize();
 
     // 認証状態の変更を監視
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      setSession(session);
-      if (session?.user) {
-        const isAnon = await checkIsAnonymous(session.user.id);
-        setIsAnonymous(isAnon);
+      if (mounted) {
+        setSession(session);
+        if (session?.user) {
+          const isAnon = await checkIsAnonymous(session.user.id);
+          setIsAnonymous(isAnon);
+        }
+        setLoading(false);
       }
-      setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signInAnonymously = async () => {
