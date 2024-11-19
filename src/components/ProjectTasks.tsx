@@ -14,7 +14,7 @@ interface ProjectTasksProps {
 
 export function ProjectTasks({ project }: ProjectTasksProps) {
   const queryClient = useQueryClient();
-  const otherTasks = project.tasks?.filter(task => !task.parent_task_id) || [];
+  const mainTasks = project.tasks?.filter(task => !task.parent_task_id) || [];
 
   useEffect(() => {
     const channel = supabase
@@ -49,7 +49,7 @@ export function ProjectTasks({ project }: ProjectTasksProps) {
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
-          {otherTasks.map((task) => (
+          {mainTasks.map((task) => (
             <TaskCard key={task.id} task={task} projectId={project.id} />
           ))}
         </div>
