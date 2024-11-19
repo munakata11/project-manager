@@ -38,22 +38,24 @@ export const CreateSubTaskDialog = ({ projectId, parentTaskId }: CreateSubTaskDi
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     try {
-      const { error } = await supabase.from("tasks").insert({
-        title: data.title,
-        description: data.description || null,
-        due_date: data.due_date || null,
-        project_id: projectId,
-        parent_task_id: parentTaskId,
-        status: "進行中",
-      });
+      const { data: newTask, error } = await supabase
+        .from("tasks")
+        .insert({
+          title: data.title,
+          description: data.description || null,
+          due_date: data.due_date || null,
+          project_id: projectId,
+          parent_task_id: parentTaskId,
+          status: "進行中",
+        })
+        .select()
+        .single();
 
-      if (error) {
-        console.error("Error creating subtask:", error);
-        throw error;
-      }
+      if (error) throw error;
 
       toast({
         title: "サブタスクを作成しました",
+        description: `${data.title}を追加しました`,
       });
 
       setOpen(false);

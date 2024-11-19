@@ -25,6 +25,7 @@ export function ProjectTasks({ project }: ProjectTasksProps) {
           event: '*',
           schema: 'public',
           table: 'tasks',
+          filter: `project_id=eq.${project.id}`
         },
         () => {
           queryClient.invalidateQueries({ queryKey: ["project", project.id] });
