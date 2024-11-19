@@ -41,7 +41,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // 一意のメールアドレスとパスワードを生成
       const uniqueId = crypto.randomUUID();
       const { error } = await supabase.auth.signUp({
-        email: `${uniqueId}@anonymous.example.com`,
+        email: `${uniqueId}@anonymous.dev`,
         password: uniqueId,
         options: {
           data: {
