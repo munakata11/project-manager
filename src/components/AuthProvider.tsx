@@ -24,6 +24,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { toast } = useToast();
 
   const checkIsAnonymous = async (userId: string) => {
+    if (!userId) return false;
+    
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -40,59 +42,50 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    let mounted = true;
-
-    async function initialize() {
+    const initializeAuth = async () => {
       try {
-        const { data: { session: initialSession }, error: sessionError } = await supabase.auth.getSession();
+        const { data: { session: initialSession }, error } = await supabase.auth.getSession();
         
-        if (sessionError) throw sessionError;
-        
-        if (!mounted) return;
+        if (error) {
+          console.error('Session initialization error:', error);
+          setLoading(false);
+          return;
+        }
 
         if (initialSession?.user) {
           const isAnon = await checkIsAnonymous(initialSession.user.id);
-          if (mounted) {
-            setSession(initialSession);
-            setIsAnonymous(isAnon);
-          }
+          setSession(initialSession);
+          setIsAnonymous(isAnon);
         }
       } catch (error) {
         console.error('Auth initialization error:', error);
       } finally {
-        if (mounted) {
-          setLoading(false);
-        }
+        setLoading(false);
       }
-    }
+    };
 
-    initialize();
+    initializeAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, currentSession) => {
-        if (!mounted) return;
-
-        if (currentSession?.user) {
-          const isAnon = await checkIsAnonymous(currentSession.user.id);
-          if (mounted) {
+        try {
+          if (currentSession?.user) {
+            const isAnon = await checkIsAnonymous(currentSession.user.id);
             setSession(currentSession);
             setIsAnonymous(isAnon);
-          }
-        } else {
-          if (mounted) {
+          } else {
             setSession(null);
             setIsAnonymous(false);
           }
-        }
-        
-        if (mounted) {
+        } catch (error) {
+          console.error('Auth state change error:', error);
+        } finally {
           setLoading(false);
         }
       }
     );
 
     return () => {
-      mounted = false;
       subscription.unsubscribe();
     };
   }, []);
