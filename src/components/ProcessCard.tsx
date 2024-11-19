@@ -4,6 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { TaskCard } from "./TaskCard";
 import { useQueryClient } from "@tanstack/react-query";
 import { ProcessHeader } from "./ProcessHeader";
+import { ProcessDependencyDialog } from "./ProcessDependencyDialog";
+import { Input } from "./ui/input";
+import { Button } from "./ui/button";
 
 interface ProcessCardProps {
   process: {
@@ -13,15 +16,21 @@ interface ProcessCardProps {
     status: string | null;
     percentage: number;
     order_index: number;
+    duration_days: number;
     tasks: any[];
   };
+  processes: Array<{
+    id: string;
+    title: string;
+  }>;
   projectId: string;
 }
 
-export const ProcessCard = ({ process, projectId }: ProcessCardProps) => {
+export const ProcessCard = ({ process, processes, projectId }: ProcessCardProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isUpdating, setIsUpdating] = useState(false);
+  const [durationDays, setDurationDays] = useState(process.duration_days);
 
   const handleDelete = async () => {
     if (!window.confirm("この工程を削除してもよろしいですか？")) return;
@@ -79,6 +88,31 @@ export const ProcessCard = ({ process, projectId }: ProcessCardProps) => {
     }
   };
 
+  const updateDurationDays = async () => {
+    try {
+      const { error } = await supabase
+        .from("processes")
+        .update({
+          duration_days: durationDays,
+        })
+        .eq("id", process.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "所要日数を更新しました",
+      });
+
+      queryClient.invalidateQueries({ queryKey: ["project", projectId] });
+    } catch (error) {
+      toast({
+        title: "エラー",
+        description: "所要日数の更新に失敗しました。",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
       <ProcessHeader
@@ -94,6 +128,27 @@ export const ProcessCard = ({ process, projectId }: ProcessCardProps) => {
         {process.description && (
           <p className="text-sm text-gray-500">{process.description}</p>
         )}
+
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-700">所要日数:</span>
+            <Input
+              type="number"
+              min={1}
+              value={durationDays}
+              onChange={(e) => setDurationDays(parseInt(e.target.value))}
+              className="w-20 h-8"
+            />
+            <Button size="sm" onClick={updateDurationDays} className="h-8">
+              更新
+            </Button>
+          </div>
+          <ProcessDependencyDialog
+            process={process}
+            processes={processes}
+            projectId={projectId}
+          />
+        </div>
 
         <div className="space-y-3">
           {process.tasks?.map((task) => (

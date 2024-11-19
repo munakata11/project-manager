@@ -5,6 +5,9 @@ import { ProcessCard } from "@/components/ProcessCard";
 import { TaskCard } from "@/components/TaskCard";
 import { CreateProcessTemplateDialog } from "./CreateProcessTemplateDialog";
 import { ApplyTemplateDialog } from "./ApplyTemplateDialog";
+import { ProcessMermaidChart } from "./ProcessMermaidChart";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ProjectTasksProps {
   project: {
@@ -16,6 +19,7 @@ interface ProjectTasksProps {
       status: string | null;
       percentage: number;
       order_index: number;
+      duration_days: number;
       tasks: any[];
     }>;
     tasks: any[];
@@ -29,6 +33,26 @@ export function ProjectTasks({ project }: ProjectTasksProps) {
   const sortedProcesses = [...(project.processes || [])].sort(
     (a, b) => a.order_index - b.order_index
   );
+
+  // 依存関係を取得
+  const { data: dependencies } = useQuery({
+    queryKey: ["process-dependencies", project.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("process_dependencies")
+        .select("*")
+        .eq("process_id", project.id);
+
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
+  // 依存関係を含むプロセスデータを作成
+  const processesWithDependencies = sortedProcesses.map(process => ({
+    ...process,
+    dependencies: dependencies?.filter(d => d.process_id === process.id),
+  }));
 
   return (
     <Card className="w-full bg-white border-gray-100">
@@ -49,6 +73,7 @@ export function ProjectTasks({ project }: ProjectTasksProps) {
             <ProcessCard
               key={process.id}
               process={process}
+              processes={sortedProcesses}
               projectId={project.id}
             />
           ))}
@@ -60,6 +85,8 @@ export function ProjectTasks({ project }: ProjectTasksProps) {
               ))}
             </div>
           )}
+          
+          <ProcessMermaidChart processes={processesWithDependencies} />
         </div>
       </CardContent>
     </Card>

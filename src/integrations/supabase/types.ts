@@ -129,6 +129,45 @@ export type Database = {
           },
         ]
       }
+      process_dependencies: {
+        Row: {
+          created_at: string
+          depends_on_id: string
+          duration_days: number | null
+          id: string
+          process_id: string
+        }
+        Insert: {
+          created_at?: string
+          depends_on_id: string
+          duration_days?: number | null
+          id?: string
+          process_id: string
+        }
+        Update: {
+          created_at?: string
+          depends_on_id?: string
+          duration_days?: number | null
+          id?: string
+          process_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "process_dependencies_depends_on_id_fkey"
+            columns: ["depends_on_id"]
+            isOneToOne: false
+            referencedRelation: "processes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "process_dependencies_process_id_fkey"
+            columns: ["process_id"]
+            isOneToOne: false
+            referencedRelation: "processes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       process_template_items: {
         Row: {
           created_at: string
@@ -210,6 +249,7 @@ export type Database = {
         Row: {
           created_at: string
           description: string | null
+          duration_days: number | null
           id: string
           order_index: number
           percentage: number | null
@@ -221,6 +261,7 @@ export type Database = {
         Insert: {
           created_at?: string
           description?: string | null
+          duration_days?: number | null
           id?: string
           order_index?: number
           percentage?: number | null
@@ -232,6 +273,7 @@ export type Database = {
         Update: {
           created_at?: string
           description?: string | null
+          duration_days?: number | null
           id?: string
           order_index?: number
           percentage?: number | null
