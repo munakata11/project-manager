@@ -1,41 +1,72 @@
-import { createContext, useContext } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { Session } from "@supabase/supabase-js";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "./ui/use-toast";
 
 interface AuthContextType {
   session: Session | null;
   loading: boolean;
   signInAnonymously: () => Promise<void>;
-  isAnonymous: boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({
   session: null,
-  loading: false,
+  loading: true,
   signInAnonymously: async () => {},
-  isAnonymous: false,
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  // 常にログイン済みとして扱う
-  const mockSession = {
-    user: {
-      id: "system",
-      email: "system@example.com",
-    },
-  } as Session;
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
-  return (
-    <AuthContext.Provider 
-      value={{
-        session: mockSession,
-        loading: false,
-        signInAnonymously: async () => {},
-        isAnonymous: false,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setLoading(false);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const signInAnonymously = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: 'anonymous@example.com',
+        password: 'anonymous',
+      });
+      
+      if (error) {
+        toast({
+          title: "エラー",
+          description: "匿名ログインに失敗しました",
+          variant: "destructive",
+        });
+        throw error;
+      }
+
+      toast({
+        title: "匿名ログインしました",
+      });
+    } catch (error) {
+      console.error('Error signing in anonymously:', error);
+    }
+  };
+
+  const value = {
+    session,
+    loading,
+    signInAnonymously,
+  };
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {
