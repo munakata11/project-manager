@@ -40,7 +40,7 @@ export const EditProcessDialog = ({ process, open, onOpenChange, projectId }: Ed
     defaultValues: {
       title: process.title,
       description: process.description || "",
-      percentage: process.percentage || 0,
+      percentage: process.percentage ?? 20,
     },
   });
 
