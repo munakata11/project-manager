@@ -29,26 +29,23 @@ interface ProjectTasksProps {
 export function ProjectTasks({ project }: ProjectTasksProps) {
   const otherTasks = project.tasks?.filter(task => !task.process_id && !task.parent_task_id) || [];
   
-  // order_indexでソートした工程リストを作成
   const sortedProcesses = [...(project.processes || [])].sort(
     (a, b) => a.order_index - b.order_index
   );
 
-  // 依存関係を取得
   const { data: dependencies } = useQuery({
     queryKey: ["process-dependencies", project.id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("process_dependencies")
         .select("*")
-        .eq("process_id", project.id);
+        .eq("project_id", project.id);
 
       if (error) throw error;
       return data || [];
     },
   });
 
-  // 依存関係を含むプロセスデータを作成
   const processesWithDependencies = sortedProcesses.map(process => ({
     ...process,
     dependencies: dependencies?.filter(d => d.process_id === process.id),
@@ -86,7 +83,9 @@ export function ProjectTasks({ project }: ProjectTasksProps) {
             </div>
           )}
           
-          <ProcessMermaidChart processes={processesWithDependencies} />
+          {processesWithDependencies.length > 0 && (
+            <ProcessMermaidChart processes={processesWithDependencies} />
+          )}
         </div>
       </CardContent>
     </Card>
