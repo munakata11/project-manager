@@ -125,15 +125,17 @@ export function NoteForm({
           required
           className="min-h-[200px]"
         />
-        <Button
-          type="button"
-          variant="outline"
-          size="icon"
-          className={`absolute bottom-2 left-2 ${isRecording ? 'bg-red-500 hover:bg-red-600 text-white' : ''}`}
-          onClick={toggleVoiceInput}
-        >
-          {isRecording ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
-        </Button>
+
+<Button
+  type="button"
+  variant="outline"
+  size="icon"
+  className={`absolute bottom-2 left-2 ${isRecording ? 'bg-blue-500 hover:bg-blue-600 text-white' : ''}`}
+  onClick={toggleVoiceInput}
+>
+  {isRecording ? <Mic className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+</Button>
+
       </div>
 
       {noteType === "meeting" && (

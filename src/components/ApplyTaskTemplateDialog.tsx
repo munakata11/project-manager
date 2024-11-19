@@ -5,6 +5,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { ChevronDown, ChevronUp, Plus } from "lucide-react";
 
 interface ApplyTaskTemplateDialogProps {
   projectId: string;
@@ -12,6 +13,7 @@ interface ApplyTaskTemplateDialogProps {
 
 export const ApplyTaskTemplateDialog = ({ projectId }: ApplyTaskTemplateDialogProps) => {
   const [open, setOpen] = useState(false);
+  const [expandedTemplates, setExpandedTemplates] = useState<string[]>([]);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -46,6 +48,14 @@ export const ApplyTaskTemplateDialog = ({ projectId }: ApplyTaskTemplateDialogPr
     },
   });
 
+  const toggleTemplate = (templateId: string) => {
+    setExpandedTemplates(prev => 
+      prev.includes(templateId) 
+        ? prev.filter(id => id !== templateId)
+        : [...prev, templateId]
+    );
+  };
+
   const applyTemplate = async (templateId: string) => {
     try {
       const { data: items } = await supabase
@@ -71,7 +81,6 @@ export const ApplyTaskTemplateDialog = ({ projectId }: ApplyTaskTemplateDialogPr
 
       toast({
         title: "テンプレートを適用しました",
-        description: "タスク一覧を作成しました",
       });
 
       setOpen(false);
@@ -110,24 +119,39 @@ export const ApplyTaskTemplateDialog = ({ projectId }: ApplyTaskTemplateDialogPr
                       <p className="mt-1 text-sm text-gray-500">{template.description}</p>
                     )}
                   </div>
-                  <Button
-                    onClick={() => applyTemplate(template.id)}
-                    className="bg-purple-600 hover:bg-purple-700 text-white"
-                    size="sm"
-                  >
-                    適用
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => toggleTemplate(template.id)}
+                    >
+                      {expandedTemplates.includes(template.id) ? (
+                        <ChevronUp className="h-4 w-4" />
+                      ) : (
+                        <ChevronDown className="h-4 w-4" />
+                      )}
+                    </Button>
+                    <Button
+                      onClick={() => applyTemplate(template.id)}
+                      className="bg-purple-600 hover:bg-purple-700 text-white"
+                      size="sm"
+                    >
+                      適用
+                    </Button>
+                  </div>
                 </div>
-                <div className="mt-3">
-                  <h4 className="text-sm font-medium text-gray-700">タスク一覧:</h4>
-                  <ul className="mt-2 space-y-1">
-                    {template.task_template_items.map((item) => (
-                      <li key={item.id} className="text-sm text-gray-600">
-                        {item.title}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                {expandedTemplates.includes(template.id) && (
+                  <div className="mt-3">
+                    <h4 className="text-sm font-medium text-gray-700">タスク一覧:</h4>
+                    <ul className="mt-2 space-y-1">
+                      {template.task_template_items.map((item) => (
+                        <li key={item.id} className="text-sm text-gray-600">
+                          {item.title}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
             ))}
             {templates?.length === 0 && (

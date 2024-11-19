@@ -5,11 +5,13 @@ import { supabase } from "@/integrations/supabase/client";
 interface AuthContextType {
   session: Session | null;
   loading: boolean;
+  signInAnonymously: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
   session: null,
   loading: true,
+  signInAnonymously: async () => {},
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -17,13 +19,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setLoading(false);
     });
 
-    // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
@@ -43,9 +43,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
+  const signInAnonymously = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: 'anonymous@example.com',
+        password: 'anonymous',
+      });
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error signing in anonymously:', error);
+    }
+  };
+
   const value = {
     session,
     loading,
+    signInAnonymously,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
