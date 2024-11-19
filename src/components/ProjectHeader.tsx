@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Trash2, Edit2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -17,10 +17,9 @@ interface ProjectHeaderProps {
   title: string;
   description?: string;
   onDelete: () => void;
-  onEdit: () => void;
 }
 
-export function ProjectHeader({ title, description, onDelete, onEdit }: ProjectHeaderProps) {
+export function ProjectHeader({ title, description, onDelete }: ProjectHeaderProps) {
   const [projectNameConfirm, setProjectNameConfirm] = useState("");
 
   return (
@@ -29,15 +28,7 @@ export function ProjectHeader({ title, description, onDelete, onEdit }: ProjectH
         <h1 className="text-2xl font-semibold text-gray-900">{title}</h1>
         <p className="mt-1 text-gray-500">{description}</p>
       </div>
-      <div className="flex gap-2">
-        <Button
-          variant="outline"
-          className="bg-white"
-          onClick={onEdit}
-        >
-          <Edit2 className="h-4 w-4 mr-2" />
-          編集
-        </Button>
+      <div>
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button variant="outline" className="bg-white border-red-500 text-red-500 hover:bg-red-50">
