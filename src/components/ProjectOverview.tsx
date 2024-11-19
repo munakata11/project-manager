@@ -68,16 +68,6 @@ export function ProjectOverview({ project }: ProjectOverviewProps) {
             </div>
 
             <div className="flex items-center gap-2">
-              <Building2 className="h-4 w-4 text-gray-500 shrink-0" />
-              <div>
-                <div className="text-sm font-medium text-gray-500">受注会社</div>
-                <div className="text-sm">
-                  {project.contractor_companies?.name || "未設定"}
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
               <Coins className="h-4 w-4 text-gray-500 shrink-0" />
               <div>
                 <div className="text-sm font-medium text-gray-500">受注金額（税抜）</div>
@@ -85,6 +75,16 @@ export function ProjectOverview({ project }: ProjectOverviewProps) {
                   {project.amount_excl_tax
                     ? `¥${project.amount_excl_tax.toLocaleString()}`
                     : "未設定"}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Building2 className="h-4 w-4 text-gray-500 shrink-0" />
+              <div>
+                <div className="text-sm font-medium text-gray-500">受注会社</div>
+                <div className="text-sm">
+                  {project.contractor_companies?.name || "未設定"}
                 </div>
               </div>
             </div>
