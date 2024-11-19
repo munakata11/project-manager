@@ -25,7 +25,7 @@ export function ProjectTasks({ project }: ProjectTasksProps) {
             タスク
           </CardTitle>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 mt-2">
           <CreateTaskDialog projectId={project.id} />
           <SaveTaskTemplateDialog projectId={project.id} tasks={tasks} />
           <ApplyTaskTemplateDialog projectId={project.id} />

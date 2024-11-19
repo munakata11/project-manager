@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { FileUp, Mic, MicOff } from "lucide-react";
+import { FileUp, Mic } from "lucide-react";
 import { FileList } from "./FileList";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 
@@ -58,7 +58,7 @@ export function NoteForm({
   };
 
   const { isRecording, toggleVoiceInput } = useSpeechRecognition((transcript) => {
-    setContent(content + transcript);
+    setContent(prev => prev + transcript);
   });
 
   return (
@@ -125,17 +125,15 @@ export function NoteForm({
           required
           className="min-h-[200px]"
         />
-
-<Button
-  type="button"
-  variant="outline"
-  size="icon"
-  className={`absolute bottom-2 left-2 ${isRecording ? 'bg-blue-500 hover:bg-blue-600 text-white' : ''}`}
-  onClick={toggleVoiceInput}
->
-  {isRecording ? <Mic className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
-</Button>
-
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          className={`absolute bottom-2 left-2 ${isRecording ? 'bg-blue-500 hover:bg-blue-600 text-white' : ''}`}
+          onClick={toggleVoiceInput}
+        >
+          <Mic className="h-4 w-4" />
+        </Button>
       </div>
 
       {noteType === "meeting" && (

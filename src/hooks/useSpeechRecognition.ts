@@ -2,7 +2,7 @@ import { useState } from "react";
 
 export function useSpeechRecognition(onTranscript: (text: string) => void) {
   const [isRecording, setIsRecording] = useState(false);
-  const [recognition, setRecognition] = useState<SpeechRecognition | null>(null);
+  const [recognition, setRecognition] = useState<any | null>(null);
 
   const toggleVoiceInput = () => {
     if (isRecording) {
@@ -11,7 +11,7 @@ export function useSpeechRecognition(onTranscript: (text: string) => void) {
       return;
     }
 
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
       alert('お使いのブラウザは音声入力に対応していません。');
       return;
@@ -22,9 +22,9 @@ export function useSpeechRecognition(onTranscript: (text: string) => void) {
     newRecognition.continuous = true;
     newRecognition.interimResults = true;
 
-    newRecognition.onresult = (event: SpeechRecognitionEvent) => {
+    newRecognition.onresult = (event: any) => {
       const transcript = Array.from(event.results)
-        .map(result => result[0].transcript)
+        .map((result: any) => result[0].transcript)
         .join('');
       onTranscript(transcript);
     };

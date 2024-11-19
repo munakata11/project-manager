@@ -112,7 +112,7 @@ export const ApplyTaskTemplateDialog = ({ projectId }: ApplyTaskTemplateDialogPr
                 key={template.id}
                 className="p-4 border rounded-lg hover:border-purple-200 transition-colors"
               >
-                <div className="flex justify-between items-start mb-3">
+                <div className="flex justify-between items-start">
                   <div>
                     <h3 className="font-medium text-gray-900">{template.title}</h3>
                     {template.description && (
