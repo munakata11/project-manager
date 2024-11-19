@@ -7,20 +7,9 @@ import { MeetingNotes } from "@/components/MeetingNotes";
 import { ProjectFiles } from "@/components/ProjectFiles";
 import { ProjectOverview } from "@/components/ProjectOverview";
 import { ProjectTasks } from "@/components/ProjectTasks";
-import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
-import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogCancel,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { ProjectHeader } from "@/components/ProjectHeader";
+import { EditProjectDialog } from "@/components/EditProjectDialog";
+import { useState, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
 
 const ProjectDetail = () => {
@@ -28,7 +17,7 @@ const ProjectDetail = () => {
   const { session } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [projectNameConfirm, setProjectNameConfirm] = useState("");
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   
   const { data: project, isLoading } = useQuery({
     queryKey: ["project", projectId],
@@ -37,6 +26,9 @@ const ProjectDetail = () => {
         .from("projects")
         .select(`
           *,
+          contractor_companies (
+            name
+          ),
           project_members (
             profile_id,
             profiles (
@@ -73,6 +65,29 @@ const ProjectDetail = () => {
     },
   });
 
+  useEffect(() => {
+    const channel = supabase
+      .channel('projects_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'projects',
+        },
+        (payload) => {
+          queryClient.invalidateQueries({ queryKey: ["projects"] });
+          queryClient.invalidateQueries({ queryKey: ["project", projectId] });
+          queryClient.invalidateQueries({ queryKey: ["sidebar-projects"] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [projectId, queryClient]);
+
   const deleteProjectMutation = useMutation({
     mutationFn: async () => {
       const { error } = await supabase
@@ -100,12 +115,6 @@ const ProjectDetail = () => {
     },
   });
 
-  const handleDeleteProject = () => {
-    if (projectNameConfirm === project?.title) {
-      deleteProjectMutation.mutate();
-    }
-  };
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -131,50 +140,17 @@ const ProjectDetail = () => {
 
   return (
     <div className="space-y-6">
-      <div className="mb-8 flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-semibold text-gray-900">{project.title}</h1>
-          <p className="mt-1 text-gray-500">{project.description}</p>
-        </div>
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button variant="outline" className="bg-white border-red-500 text-red-500 hover:bg-red-50">
-              <Trash2 className="h-4 w-4 mr-2" />
-              プロジェクトを削除
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>プロジェクトを削除しますか？</AlertDialogTitle>
-              <AlertDialogDescription>
-                この操作は取り消せません。削除を確認するには、プロジェクト名を入力してください。
-                <div className="mt-4">
-                  <Input
-                    placeholder={project.title}
-                    value={projectNameConfirm}
-                    onChange={(e) => setProjectNameConfirm(e.target.value)}
-                    className="w-full"
-                  />
-                </div>
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel onClick={() => setProjectNameConfirm("")}>
-                キャンセル
-              </AlertDialogCancel>
-              <Button
-                variant="destructive"
-                onClick={handleDeleteProject}
-                disabled={projectNameConfirm !== project.title}
-              >
-                削除する
-              </Button>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      </div>
+      <ProjectHeader
+        title={project.title}
+        description={project.description}
+        onDelete={() => deleteProjectMutation.mutate()}
+        onEdit={() => setIsEditDialogOpen(true)}
+      />
 
-      <ProjectOverview project={project} />
+      <ProjectOverview project={{
+        ...project,
+        contractor_company_name: project.contractor_companies?.name
+      }} />
 
       <Tabs defaultValue="tasks" className="w-full">
         <TabsList>
@@ -195,6 +171,12 @@ const ProjectDetail = () => {
           <ProjectFiles projectId={project.id} />
         </TabsContent>
       </Tabs>
+
+      <EditProjectDialog
+        project={project}
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+      />
     </div>
   );
 };
