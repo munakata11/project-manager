@@ -3,9 +3,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/components/ui/use-toast";
-import { CalendarDays, Trash2, User } from "lucide-react";
+import { CalendarDays, ChevronDown, ChevronRight, Trash2, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
+import { CreateSubTaskDialog } from "./CreateSubTaskDialog";
 
 interface TaskCardProps {
   task: {
@@ -18,12 +19,15 @@ interface TaskCardProps {
       full_name: string | null;
       avatar_url: string | null;
     } | null;
+    subtasks?: TaskCardProps["task"][];
   };
   projectId: string;
+  level?: number;
 }
 
-export const TaskCard = ({ task, projectId }: TaskCardProps) => {
+export const TaskCard = ({ task, projectId, level = 0 }: TaskCardProps) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -83,17 +87,47 @@ export const TaskCard = ({ task, projectId }: TaskCardProps) => {
   return (
     <Card className="bg-white border-gray-100 hover:border-purple-100 transition-colors">
       <CardContent className="p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Checkbox
-              checked={task.status === "完了"}
-              onCheckedChange={(checked) => {
-                handleStatusChange(checked ? "完了" : "進行中");
-              }}
-              disabled={isLoading}
-            />
-            <div className="space-y-2">
-              <h3 className="font-medium text-gray-900">{task.title}</h3>
+        <div className="flex items-start justify-between">
+          <div className="flex items-start gap-3 flex-1">
+            <div className="flex items-center gap-2 mt-1">
+              <Checkbox
+                checked={task.status === "完了"}
+                onCheckedChange={(checked) => {
+                  handleStatusChange(checked ? "完了" : "進行中");
+                }}
+                disabled={isLoading}
+              />
+              {task.subtasks && task.subtasks.length > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="p-0 h-4 hover:bg-transparent"
+                  onClick={() => setIsExpanded(!isExpanded)}
+                >
+                  {isExpanded ? (
+                    <ChevronDown className="h-4 w-4 text-gray-500" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4 text-gray-500" />
+                  )}
+                </Button>
+              )}
+            </div>
+            <div className="space-y-2 flex-1">
+              <div className="flex items-start justify-between gap-4">
+                <h3 className="font-medium text-gray-900">{task.title}</h3>
+                <div className="flex items-center gap-2">
+                  <CreateSubTaskDialog projectId={projectId} parentTaskId={task.id} />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleDelete}
+                    disabled={isLoading}
+                    className="h-7 hover:text-red-500"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
+                </div>
+              </div>
               {task.description && (
                 <p className="text-sm text-gray-500">{task.description}</p>
               )}
@@ -115,15 +149,19 @@ export const TaskCard = ({ task, projectId }: TaskCardProps) => {
               </div>
             </div>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleDelete}
-            disabled={isLoading}
-          >
-            <Trash2 className="h-4 w-4 text-red-500" />
-          </Button>
         </div>
+        {isExpanded && task.subtasks && task.subtasks.length > 0 && (
+          <div className="mt-4 space-y-3 pl-8">
+            {task.subtasks.map((subtask) => (
+              <TaskCard
+                key={subtask.id}
+                task={subtask}
+                projectId={projectId}
+                level={level + 1}
+              />
+            ))}
+          </div>
+        )}
       </CardContent>
     </Card>
   );

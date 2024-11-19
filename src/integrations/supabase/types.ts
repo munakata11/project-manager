@@ -129,6 +129,83 @@ export type Database = {
           },
         ]
       }
+      process_template_items: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          order_index: number
+          template_id: string | null
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          order_index?: number
+          template_id?: string | null
+          title: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          order_index?: number
+          template_id?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "process_template_items_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "process_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      process_templates: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          project_id: string | null
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          project_id?: string | null
+          title: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          project_id?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "process_templates_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "process_templates_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       processes: {
         Row: {
           created_at: string
@@ -138,6 +215,7 @@ export type Database = {
           percentage: number | null
           project_id: string
           status: string | null
+          template_id: string | null
           title: string
         }
         Insert: {
@@ -148,6 +226,7 @@ export type Database = {
           percentage?: number | null
           project_id: string
           status?: string | null
+          template_id?: string | null
           title: string
         }
         Update: {
@@ -158,6 +237,7 @@ export type Database = {
           percentage?: number | null
           project_id?: string
           status?: string | null
+          template_id?: string | null
           title?: string
         }
         Relationships: [
@@ -166,6 +246,13 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "processes_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "process_templates"
             referencedColumns: ["id"]
           },
         ]
@@ -384,6 +471,7 @@ export type Database = {
           description: string | null
           due_date: string | null
           id: string
+          parent_task_id: string | null
           process_id: string | null
           project_id: string
           status: string | null
@@ -395,6 +483,7 @@ export type Database = {
           description?: string | null
           due_date?: string | null
           id?: string
+          parent_task_id?: string | null
           process_id?: string | null
           project_id: string
           status?: string | null
@@ -406,6 +495,7 @@ export type Database = {
           description?: string | null
           due_date?: string | null
           id?: string
+          parent_task_id?: string | null
           process_id?: string | null
           project_id?: string
           status?: string | null
@@ -417,6 +507,13 @@ export type Database = {
             columns: ["assignee_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_parent_task_id_fkey"
+            columns: ["parent_task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
             referencedColumns: ["id"]
           },
           {

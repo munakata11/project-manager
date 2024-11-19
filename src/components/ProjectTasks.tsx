@@ -3,6 +3,8 @@ import { CreateTaskDialog } from "@/components/CreateTaskDialog";
 import { CreateProcessDialog } from "@/components/CreateProcessDialog";
 import { ProcessCard } from "@/components/ProcessCard";
 import { TaskCard } from "@/components/TaskCard";
+import { CreateProcessTemplateDialog } from "./CreateProcessTemplateDialog";
+import { ApplyTemplateDialog } from "./ApplyTemplateDialog";
 
 interface ProjectTasksProps {
   project: {
@@ -21,7 +23,7 @@ interface ProjectTasksProps {
 }
 
 export function ProjectTasks({ project }: ProjectTasksProps) {
-  const otherTasks = project.tasks?.filter(task => !task.process_id) || [];
+  const otherTasks = project.tasks?.filter(task => !task.process_id && !task.parent_task_id) || [];
   
   // order_indexでソートした工程リストを作成
   const sortedProcesses = [...(project.processes || [])].sort(
@@ -35,6 +37,8 @@ export function ProjectTasks({ project }: ProjectTasksProps) {
           工程・タスク
         </CardTitle>
         <div className="flex gap-2">
+          <CreateProcessTemplateDialog projectId={project.id} processes={sortedProcesses} />
+          <ApplyTemplateDialog projectId={project.id} />
           <CreateProcessDialog projectId={project.id} />
           <CreateTaskDialog projectId={project.id} />
         </div>
