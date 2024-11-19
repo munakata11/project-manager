@@ -31,11 +31,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .eq('id', userId)
         .single();
       
-      if (error) {
-        console.error('Error checking anonymous status:', error);
-        return false;
-      }
-      
+      if (error) throw error;
       return data?.is_anonymous || false;
     } catch (error) {
       console.error('Error in checkIsAnonymous:', error);
@@ -46,42 +42,54 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let mounted = true;
 
-    const initialize = async () => {
+    async function initialize() {
       try {
-        // 既存のセッションを取得
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session: initialSession }, error: sessionError } = await supabase.auth.getSession();
         
-        if (mounted) {
-          setSession(session);
-          if (session?.user) {
-            const isAnon = await checkIsAnonymous(session.user.id);
+        if (sessionError) throw sessionError;
+        
+        if (!mounted) return;
+
+        if (initialSession?.user) {
+          const isAnon = await checkIsAnonymous(initialSession.user.id);
+          if (mounted) {
+            setSession(initialSession);
             setIsAnonymous(isAnon);
           }
-          setLoading(false);
         }
       } catch (error) {
-        console.error('Error initializing auth:', error);
+        console.error('Auth initialization error:', error);
+      } finally {
         if (mounted) {
           setLoading(false);
         }
       }
-    };
+    }
 
     initialize();
 
-    // 認証状態の変更を監視
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (mounted) {
-        setSession(session);
-        if (session?.user) {
-          const isAnon = await checkIsAnonymous(session.user.id);
-          setIsAnonymous(isAnon);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (_event, currentSession) => {
+        if (!mounted) return;
+
+        if (currentSession?.user) {
+          const isAnon = await checkIsAnonymous(currentSession.user.id);
+          if (mounted) {
+            setSession(currentSession);
+            setIsAnonymous(isAnon);
+          }
+        } else {
+          if (mounted) {
+            setSession(null);
+            setIsAnonymous(false);
+          }
         }
-        setLoading(false);
+        
+        if (mounted) {
+          setLoading(false);
+        }
       }
-    });
+    );
 
     return () => {
       mounted = false;
@@ -123,14 +131,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const value = {
-    session,
-    loading,
-    signInAnonymously,
-    isAnonymous,
-  };
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider 
+      value={{
+        session,
+        loading,
+        signInAnonymously,
+        isAnonymous,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export function useAuth() {
