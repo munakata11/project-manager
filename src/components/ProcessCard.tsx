@@ -4,7 +4,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { TaskCard } from "./TaskCard";
 import { useQueryClient } from "@tanstack/react-query";
 import { ProcessHeader } from "./ProcessHeader";
-import { Progress } from "@/components/ui/progress";
 
 interface ProcessCardProps {
   process: {
@@ -53,13 +52,11 @@ export const ProcessCard = ({ process, projectId }: ProcessCardProps) => {
     try {
       setIsUpdating(true);
       const newStatus = checked ? "完了" : "進行中";
-      const newPercentage = checked ? 100 : calculateTaskProgress();
 
       const { error } = await supabase
         .from("processes")
         .update({
           status: newStatus,
-          percentage: newPercentage,
         })
         .eq("id", process.id);
 
@@ -82,16 +79,6 @@ export const ProcessCard = ({ process, projectId }: ProcessCardProps) => {
     }
   };
 
-  // タスクの進捗を計算する関数
-  const calculateTaskProgress = () => {
-    const totalTasks = process.tasks.length;
-    if (totalTasks === 0) return 0;
-    
-    const completedTasks = process.tasks.filter(task => task.status === "完了").length;
-    const progressPerTask = 100 / totalTasks;
-    return Math.round(completedTasks * progressPerTask);
-  };
-
   return (
     <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
       <ProcessHeader
@@ -104,19 +91,6 @@ export const ProcessCard = ({ process, projectId }: ProcessCardProps) => {
       />
 
       <div className="mt-4 space-y-4">
-        <div className="flex items-center gap-2">
-          <div className="flex-1">
-            <div className="flex justify-between text-sm text-gray-600 mb-1">
-              <span>進捗状況</span>
-              <span className="font-medium">{calculateTaskProgress()}%</span>
-            </div>
-            <Progress 
-              value={calculateTaskProgress()} 
-              className="h-2.5 bg-gray-100" 
-            />
-          </div>
-        </div>
-
         {process.description && (
           <p className="text-sm text-gray-500">{process.description}</p>
         )}
