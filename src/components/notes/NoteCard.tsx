@@ -13,6 +13,13 @@ interface NoteCardProps {
 }
 
 export function NoteCard({ note, onEdit, onDelete, onFormat }: NoteCardProps) {
+  const hasMetadata = (note.note_type === "call" && note.contact_person) ||
+    (note.note_type === "meeting" && (note.participants || note.location));
+
+  const hasAttachments = note.note_type === "meeting" && 
+    note.meeting_note_attachments && 
+    note.meeting_note_attachments.length > 0;
+
   return (
     <Card key={note.id} className="border-gray-100">
       <CardContent className="p-4">
@@ -50,35 +57,35 @@ export function NoteCard({ note, onEdit, onDelete, onFormat }: NoteCardProps) {
           </div>
         </div>
 
-        <div className="bg-gray-50 rounded-lg p-3 mb-4">
-          {note.note_type === "call" && note.contact_person && (
-            <p className="text-sm text-gray-600 mb-2">
-              <span className="font-medium">相手:</span> {note.contact_person}
-            </p>
-          )}
-          {note.note_type === "meeting" && (
-            <>
-              {note.participants && (
-                <p className="text-sm text-gray-600 mb-2">
-                  <span className="font-medium">参加者:</span> {note.participants}
-                </p>
-              )}
-              {note.location && (
-                <p className="text-sm text-gray-600">
-                  <span className="font-medium">場所:</span> {note.location}
-                </p>
-              )}
-            </>
-          )}
-        </div>
-
-        <Separator className="my-4" />
+        {hasMetadata && (
+          <div className="bg-gray-50 rounded-lg p-3 mb-4">
+            {note.note_type === "call" && note.contact_person && (
+              <p className="text-sm text-gray-600 mb-2">
+                <span className="font-medium">相手:</span> {note.contact_person}
+              </p>
+            )}
+            {note.note_type === "meeting" && (
+              <>
+                {note.participants && (
+                  <p className="text-sm text-gray-600 mb-2">
+                    <span className="font-medium">参加者:</span> {note.participants}
+                  </p>
+                )}
+                {note.location && (
+                  <p className="text-sm text-gray-600">
+                    <span className="font-medium">場所:</span> {note.location}
+                  </p>
+                )}
+              </>
+            )}
+          </div>
+        )}
 
         <p className="text-gray-600 whitespace-pre-wrap">
           {note.content}
         </p>
 
-        {note.note_type === "meeting" && note.meeting_note_attachments && (
+        {hasAttachments && (
           <>
             <Separator className="my-4" />
             <NoteAttachments noteId={note.id} attachments={note.meeting_note_attachments} />
