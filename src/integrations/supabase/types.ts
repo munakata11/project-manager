@@ -305,18 +305,21 @@ export type Database = {
           created_at: string
           full_name: string | null
           id: string
+          is_anonymous: boolean | null
         }
         Insert: {
           avatar_url?: string | null
           created_at?: string
           full_name?: string | null
           id: string
+          is_anonymous?: boolean | null
         }
         Update: {
           avatar_url?: string | null
           created_at?: string
           full_name?: string | null
           id?: string
+          is_anonymous?: boolean | null
         }
         Relationships: []
       }
