@@ -38,9 +38,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signInAnonymously = async () => {
     try {
-      const { error } = await supabase.auth.signUp({
-        email: `${crypto.randomUUID()}@anonymous.user`,
-        password: crypto.randomUUID(),
+      const { error } = await supabase.auth.signInWithPassword({
+        email: 'anonymous@example.com',
+        password: 'anonymous',
       });
       
       if (error) {
