@@ -5,7 +5,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ChevronDown, ChevronUp, Plus } from "lucide-react";
+import { ChevronDown, ChevronUp, Plus, Trash2 } from "lucide-react";
 
 interface ApplyTaskTemplateDialogProps {
   projectId: string;
@@ -54,6 +54,38 @@ export const ApplyTaskTemplateDialog = ({ projectId }: ApplyTaskTemplateDialogPr
         ? prev.filter(id => id !== templateId)
         : [...prev, templateId]
     );
+  };
+
+  const deleteTemplate = async (templateId: string) => {
+    if (!window.confirm("このテンプレートを削除してもよろしいですか？")) return;
+
+    try {
+      const { error: itemsError } = await supabase
+        .from("task_template_items")
+        .delete()
+        .eq("template_id", templateId);
+
+      if (itemsError) throw itemsError;
+
+      const { error: templateError } = await supabase
+        .from("task_templates")
+        .delete()
+        .eq("id", templateId);
+
+      if (templateError) throw templateError;
+
+      toast({
+        title: "テンプレートを削除しました",
+      });
+
+      queryClient.invalidateQueries({ queryKey: ["task-templates"] });
+    } catch (error) {
+      toast({
+        title: "エラー",
+        description: "テンプレートの削除に失敗しました。",
+        variant: "destructive",
+      });
+    }
   };
 
   const applyTemplate = async (templateId: string) => {
@@ -137,6 +169,14 @@ export const ApplyTaskTemplateDialog = ({ projectId }: ApplyTaskTemplateDialogPr
                       size="sm"
                     >
                       適用
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => deleteTemplate(template.id)}
+                      className="text-red-500 hover:text-red-600"
+                    >
+                      <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>

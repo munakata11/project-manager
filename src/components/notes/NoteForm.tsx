@@ -1,179 +1,84 @@
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { FileUp, Mic } from "lucide-react";
-import { FileList } from "./FileList";
+import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { Note } from "@/types/note";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 
+const formSchema = z.object({
+  title: z.string().min(1, "タイトルは必須です"),
+  content: z.string().min(1, "内容は必須です"),
+});
+
+type FormData = z.infer<typeof formSchema>;
+
 interface NoteFormProps {
-  noteTitle: string;
-  setNoteTitle: (title: string) => void;
-  content: string;
-  setContent: (content: string) => void;
-  useAITitle: boolean;
-  setUseAITitle: (useAI: boolean) => void;
-  files: File[];
-  setFiles: (files: File[] | ((prev: File[]) => File[])) => void;
-  onSubmit: (e: React.FormEvent) => void;
+  note?: Note;
+  onSubmit: (data: FormData) => void;
   onCancel: () => void;
-  isLoading: boolean;
-  noteType: "meeting" | "call";
-  participants?: string;
-  setParticipants?: (participants: string) => void;
-  location?: string;
-  setLocation?: (location: string) => void;
-  contactPerson?: string;
-  setContactPerson?: (person: string) => void;
 }
 
-export function NoteForm({
-  noteTitle,
-  setNoteTitle,
-  content,
-  setContent,
-  useAITitle,
-  setUseAITitle,
-  files,
-  setFiles,
-  onSubmit,
-  onCancel,
-  isLoading,
-  noteType,
-  participants,
-  setParticipants,
-  location,
-  setLocation,
-  contactPerson,
-  setContactPerson,
-}: NoteFormProps) {
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFiles = Array.from(e.target.files || []);
-    setFiles(prev => [...prev, ...selectedFiles]);
-  };
-
-  const removeFile = (index: number) => {
-    setFiles(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const { isRecording, toggleVoiceInput } = useSpeechRecognition((transcript) => {
-    setContent(prev => prev + transcript);
+export function NoteForm({ note, onSubmit, onCancel }: NoteFormProps) {
+  const toast = useToast();
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      title: note?.title || "",
+      content: note?.content || "",
+    },
   });
 
+  const { isRecording, toggleVoiceInput } = useSpeechRecognition((transcript) => {
+    setContent((prev: string) => prev + transcript);
+  });
+
+  const onSubmitHandler = async (data: FormData) => {
+    try {
+      await onSubmit(data);
+      toast({
+        title: "ノートが保存されました",
+      });
+    } catch (error) {
+      toast({
+        title: "エラー",
+        description: "ノートの保存に失敗しました。",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
-    <form onSubmit={onSubmit} className="space-y-4">
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <Input
-            placeholder="タイトル"
-            value={noteTitle}
-            onChange={(e) => setNoteTitle(e.target.value)}
-            required={!useAITitle}
-            disabled={useAITitle}
-            className="flex-1 mr-2"
-          />
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="useAI"
-              checked={useAITitle}
-              onCheckedChange={(checked) => setUseAITitle(checked as boolean)}
-            />
-            <Label htmlFor="useAI" className="text-sm">AI生成</Label>
-          </div>
-        </div>
-      </div>
-
-      {noteType === "call" && setContactPerson && (
-        <div className="space-y-2">
-          <Input
-            placeholder="相手"
-            value={contactPerson}
-            onChange={(e) => setContactPerson(e.target.value)}
-          />
-        </div>
+    <form onSubmit={form.handleSubmit(onSubmitHandler)} className="space-y-4">
+      <Input
+        {...form.register("title")}
+        placeholder="タイトルを入力"
+        className="border-gray-200"
+      />
+      {form.formState.errors.title && (
+        <p className="text-red-500">{form.formState.errors.title.message}</p>
       )}
-
-      {noteType === "meeting" && (
-        <>
-          {setParticipants && (
-            <div className="space-y-2">
-              <Input
-                placeholder="参加者"
-                value={participants}
-                onChange={(e) => setParticipants(e.target.value)}
-              />
-            </div>
-          )}
-          {setLocation && (
-            <div className="space-y-2">
-              <Input
-                placeholder="場所"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-              />
-            </div>
-          )}
-        </>
+      <Textarea
+        {...form.register("content")}
+        placeholder="内容を入力"
+        className="border-gray-200"
+      />
+      {form.formState.errors.content && (
+        <p className="text-red-500">{form.formState.errors.content.message}</p>
       )}
-
-      <div className="space-y-2 relative">
-        <Textarea
-          placeholder="内容"
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          required
-          className="min-h-[200px]"
-        />
-        <Button
-          type="button"
-          variant="outline"
-          size="icon"
-          className={`absolute bottom-2 left-2 ${isRecording ? 'bg-blue-500 hover:bg-blue-600 text-white' : ''}`}
-          onClick={toggleVoiceInput}
-        >
-          <Mic className="h-4 w-4" />
-        </Button>
-      </div>
-
-      {noteType === "meeting" && (
-        <div className="space-y-2">
-          <div className="flex items-center space-x-2">
-            <Input
-              type="file"
-              onChange={handleFileChange}
-              className="hidden"
-              id="file-upload"
-              multiple
-            />
-            <Label
-              htmlFor="file-upload"
-              className="flex items-center space-x-2 cursor-pointer bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md"
-            >
-              <FileUp className="h-4 w-4" />
-              <span>添付ファイル追加</span>
-            </Label>
-          </div>
-          {files.length > 0 && (
-            <FileList files={files} onRemove={removeFile} />
-          )}
-        </div>
-      )}
-
-      <div className="flex justify-end gap-2">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onCancel}
-        >
+      <div className="flex justify-between">
+        <Button type="button" onClick={onCancel} variant="ghost">
           キャンセル
         </Button>
-        <Button
-          type="submit"
-          className="bg-purple-600 hover:bg-purple-700"
-          disabled={isLoading}
-        >
-          作成
+        <Button type="submit" className="bg-blue-600 text-white">
+          保存
+        </Button>
+        <Button type="button" onClick={toggleVoiceInput} className="bg-gray-300">
+          {isRecording ? "停止" : "音声入力"}
         </Button>
       </div>
     </form>
