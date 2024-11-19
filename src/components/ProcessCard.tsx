@@ -82,6 +82,14 @@ export const ProcessCard = ({ process, projectId }: ProcessCardProps) => {
     }
   };
 
+  // 進捗状況の値を安全に取得する関数
+  const getPercentage = () => {
+    if (typeof process.percentage === 'number') {
+      return process.percentage;
+    }
+    return 0;
+  };
+
   return (
     <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
       <ProcessHeader
@@ -98,16 +106,16 @@ export const ProcessCard = ({ process, projectId }: ProcessCardProps) => {
           <div className="flex-1">
             <div className="flex justify-between text-sm text-gray-600 mb-1">
               <span>進捗状況</span>
-              <span className="font-medium">{process.percentage}%</span>
+              <span className="font-medium">{getPercentage()}%</span>
             </div>
             <Progress 
-              value={process.percentage} 
+              value={getPercentage()} 
               className="h-2.5 bg-gray-100" 
             />
             <div className="text-xs text-gray-500 mt-1">
-              <div>現在の進捗: {process.percentage}%</div>
+              <div>現在の進捗: {getPercentage()}%</div>
               <div className="text-xs text-purple-600">
-                データベース値: {process.percentage}
+                データベース値: {getPercentage()}
               </div>
             </div>
           </div>

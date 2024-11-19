@@ -7,7 +7,15 @@ import { TaskCard } from "@/components/TaskCard";
 interface ProjectTasksProps {
   project: {
     id: string;
-    processes: any[];
+    processes: Array<{
+      id: string;
+      title: string;
+      description: string | null;
+      status: string | null;
+      percentage: number;
+      order_index: number;
+      tasks: any[];
+    }>;
     tasks: any[];
   };
 }
