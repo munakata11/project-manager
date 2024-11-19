@@ -47,7 +47,10 @@ export const CreateSubTaskDialog = ({ projectId, parentTaskId }: CreateSubTaskDi
         status: "進行中",
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error creating subtask:", error);
+        throw error;
+      }
 
       toast({
         title: "サブタスクを作成しました",

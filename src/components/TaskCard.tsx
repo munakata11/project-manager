@@ -31,30 +31,11 @@ export const TaskCard = ({ task, projectId, level = 0 }: TaskCardProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  useEffect(() => {
-    const channel = supabase
-      .channel('tasks_changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'tasks',
-        },
-        () => {
-          queryClient.invalidateQueries({ queryKey: ["project", projectId] });
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [projectId, queryClient]);
-
-  const handleStatusChange = async (newStatus: string) => {
+  const handleStatusChange = async (checked: boolean) => {
     try {
       setIsLoading(true);
+      const newStatus = checked ? "完了" : "進行中";
+      
       const { error } = await supabase
         .from("tasks")
         .update({ status: newStatus })
@@ -69,6 +50,7 @@ export const TaskCard = ({ task, projectId, level = 0 }: TaskCardProps) => {
 
       queryClient.invalidateQueries({ queryKey: ["project", projectId] });
     } catch (error) {
+      console.error("Error updating task status:", error);
       toast({
         title: "エラー",
         description: "ステータスの更新に失敗しました。",
@@ -95,6 +77,7 @@ export const TaskCard = ({ task, projectId, level = 0 }: TaskCardProps) => {
 
       queryClient.invalidateQueries({ queryKey: ["project", projectId] });
     } catch (error) {
+      console.error("Error deleting task:", error);
       toast({
         title: "エラー",
         description: "タスクの削除に失敗しました。",
@@ -105,6 +88,27 @@ export const TaskCard = ({ task, projectId, level = 0 }: TaskCardProps) => {
     }
   };
 
+  useEffect(() => {
+    const channel = supabase
+      .channel('tasks_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'tasks',
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ["project", projectId] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [projectId, queryClient]);
+
   return (
     <Card className={`bg-white border-gray-100 hover:border-purple-100 transition-colors ${level > 0 ? 'ml-8' : ''}`}>
       <CardContent className="p-4">
@@ -113,9 +117,7 @@ export const TaskCard = ({ task, projectId, level = 0 }: TaskCardProps) => {
             <div className="flex items-center gap-2 mt-1">
               <Checkbox
                 checked={task.status === "完了"}
-                onCheckedChange={(checked) => {
-                  handleStatusChange(checked ? "完了" : "進行中");
-                }}
+                onCheckedChange={handleStatusChange}
                 disabled={isLoading}
               />
               {task.subtasks && task.subtasks.length > 0 && (
@@ -135,7 +137,9 @@ export const TaskCard = ({ task, projectId, level = 0 }: TaskCardProps) => {
             </div>
             <div className="space-y-2 flex-1">
               <div className="flex items-start justify-between gap-4">
-                <h3 className="font-medium text-gray-900">{task.title}</h3>
+                <h3 className={`font-medium ${task.status === "完了" ? "line-through text-gray-500" : "text-gray-900"}`}>
+                  {task.title}
+                </h3>
                 <div className="flex items-center gap-2">
                   <CreateSubTaskDialog projectId={projectId} parentTaskId={task.id} />
                   <Button
@@ -150,7 +154,9 @@ export const TaskCard = ({ task, projectId, level = 0 }: TaskCardProps) => {
                 </div>
               </div>
               {task.description && (
-                <p className="text-sm text-gray-500">{task.description}</p>
+                <p className={`text-sm ${task.status === "完了" ? "line-through text-gray-400" : "text-gray-500"}`}>
+                  {task.description}
+                </p>
               )}
               <div className="flex items-center gap-4">
                 {task.due_date && (
