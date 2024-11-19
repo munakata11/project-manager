@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
-import { Edit, Calendar, Building2, CircleDollarSign, Percent } from "lucide-react";
+import { Edit, Calendar, Building2, Coins, Percent } from "lucide-react";
 import { useState } from "react";
 import { EditProjectDialog } from "./EditProjectDialog";
 import { Progress } from "@/components/ui/progress";
@@ -78,7 +78,7 @@ export function ProjectOverview({ project }: ProjectOverviewProps) {
             </div>
 
             <div className="flex items-center gap-2">
-              <CircleDollarSign className="h-4 w-4 text-gray-500 shrink-0" />
+              <Coins className="h-4 w-4 text-gray-500 shrink-0" />
               <div>
                 <div className="text-sm font-medium text-gray-500">受注金額（税抜）</div>
                 <div className="text-sm">
@@ -90,7 +90,7 @@ export function ProjectOverview({ project }: ProjectOverviewProps) {
             </div>
 
             <div className="flex items-center gap-2">
-              <CircleDollarSign className="h-4 w-4 text-gray-500 shrink-0" />
+              <Coins className="h-4 w-4 text-gray-500 shrink-0" />
               <div>
                 <div className="text-sm font-medium text-gray-500">受注金額（税込）</div>
                 <div className="text-sm">
@@ -100,11 +100,6 @@ export function ProjectOverview({ project }: ProjectOverviewProps) {
                 </div>
               </div>
             </div>
-          </div>
-
-          <div className="pt-2">
-            <div className="text-sm font-medium text-gray-500 mb-1">説明</div>
-            <p className="text-sm whitespace-pre-wrap">{project.description || "未設定"}</p>
           </div>
         </div>
       </CardContent>
