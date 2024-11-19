@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -67,34 +67,6 @@ export function ContractorCompanySelect({ value, onChange }: ContractorCompanySe
     refetch();
   };
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm("この会社を削除してもよろしいですか？")) return;
-
-    const { error } = await supabase
-      .from("contractor_companies")
-      .delete()
-      .eq("id", id);
-
-    if (error) {
-      toast({
-        title: "エラー",
-        description: "会社の削除に失敗しました。",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    toast({
-      title: "成功",
-      description: "会社を削除しました。",
-    });
-    
-    if (value === id) {
-      onChange("");
-    }
-    refetch();
-  };
-
   return (
     <div className="space-y-2">
       <div className="flex gap-2">
@@ -104,22 +76,9 @@ export function ContractorCompanySelect({ value, onChange }: ContractorCompanySe
           </SelectTrigger>
           <SelectContent>
             {companies?.map((company) => (
-              <div key={company.id} className="flex items-center justify-between px-2 py-1.5">
-                <SelectItem value={company.id}>
-                  {company.name}
-                </SelectItem>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleDelete(company.id);
-                  }}
-                >
-                  <Trash2 className="h-4 w-4 text-red-500" />
-                </Button>
-              </div>
+              <SelectItem key={company.id} value={company.id}>
+                {company.name}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
