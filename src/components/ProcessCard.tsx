@@ -53,7 +53,7 @@ export const ProcessCard = ({ process, projectId }: ProcessCardProps) => {
     try {
       setIsUpdating(true);
       const newStatus = checked ? "完了" : "進行中";
-      const newPercentage = checked ? 100 : process.percentage;
+      const newPercentage = checked ? 100 : process.percentage || 0;
 
       const { error } = await supabase
         .from("processes")
@@ -98,10 +98,10 @@ export const ProcessCard = ({ process, projectId }: ProcessCardProps) => {
           <div className="flex-1">
             <div className="flex justify-between text-sm text-gray-600 mb-1">
               <span>進捗</span>
-              <span>{process.percentage}%</span>
+              <span>{process.percentage || 0}%</span>
             </div>
             <Progress 
-              value={process.percentage} 
+              value={process.percentage || 0} 
               className="h-2 bg-gray-100" 
             />
           </div>
