@@ -16,25 +16,33 @@ export const ApplyTaskTemplateDialog = ({ projectId }: ApplyTaskTemplateDialogPr
   const queryClient = useQueryClient();
 
   const { data: templates } = useQuery({
-    queryKey: ["task-templates", projectId],
+    queryKey: ["task-templates"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("task_templates")
-        .select(`
-          id,
-          title,
-          description,
-          task_template_items (
-            id,
-            title,
-            description,
-            order_index
-          )
-        `)
+        .select("id, title, description")
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return data;
+
+      const templatesWithItems = await Promise.all(
+        data.map(async (template) => {
+          const { data: items, error: itemsError } = await supabase
+            .from("task_template_items")
+            .select("id, title, description, order_index")
+            .eq("template_id", template.id)
+            .order("order_index", { ascending: true });
+
+          if (itemsError) throw itemsError;
+
+          return {
+            ...template,
+            task_template_items: items,
+          };
+        })
+      );
+
+      return templatesWithItems;
     },
   });
 
