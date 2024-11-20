@@ -23,12 +23,9 @@ export function ProjectHeader({ title, description, onDelete }: ProjectHeaderPro
   const [projectNameConfirm, setProjectNameConfirm] = useState("");
 
   return (
-    <div className="mb-8 flex justify-between items-center">
-      <div>
+    <div className="mb-8">
+      <div className="flex justify-between items-start">
         <h1 className="text-2xl font-semibold text-gray-900">{title}</h1>
-        <p className="mt-1 text-gray-500">{description}</p>
-      </div>
-      <div>
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button variant="outline" className="bg-white border-red-500 text-red-500 hover:bg-red-50">
@@ -71,6 +68,9 @@ export function ProjectHeader({ title, description, onDelete }: ProjectHeaderPro
           </AlertDialogContent>
         </AlertDialog>
       </div>
+      {description && (
+        <p className="mt-3 text-gray-500">{description}</p>
+      )}
     </div>
   );
 }

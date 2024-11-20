@@ -58,7 +58,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex h-screen">
-      <div className="w-64 bg-white border-r border-gray-200 p-4">
+      <div className="w-80 bg-white border-r border-gray-200 p-4">
         <div className="mb-8">
           <h1 className="text-xl font-semibold text-purple-600">
             Project Manager
@@ -107,7 +107,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         </div>
       </div>
 
-      <main className="flex-1 overflow-auto bg-gray-50 p-6 max-w-[1200px] mx-auto">
+      <main className="flex-1 overflow-auto bg-gray-50 p-6 max-w-[1300px] mx-auto">
         {children}
       </main>
     </div>

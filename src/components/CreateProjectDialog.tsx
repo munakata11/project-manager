@@ -10,12 +10,14 @@ import { useAuth } from "@/components/AuthProvider";
 import { Plus } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ProjectFormFields, formSchema, FormData } from "./ProjectFormFields";
+import { useQueryClient } from "@tanstack/react-query";
 
 export const CreateProjectDialog = () => {
   const [open, setOpen] = useState(false);
   const { session } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -40,7 +42,12 @@ export const CreateProjectDialog = () => {
           contractor_company_id: data.contractor_company_id,
           owner_id: session?.user?.id,
         })
-        .select()
+        .select(`
+          *,
+          contractor_companies (
+            name
+          )
+        `)
         .single();
 
       if (error) throw error;
@@ -51,6 +58,13 @@ export const CreateProjectDialog = () => {
           profile_id: session?.user?.id,
           role: "owner",
         });
+
+        queryClient.invalidateQueries({ queryKey: ["projects"] });
+        queryClient.invalidateQueries({ queryKey: ["sidebar-projects"] });
+
+        setTimeout(() => {
+          queryClient.invalidateQueries({ queryKey: ["projects"] });
+        }, 500);
 
         toast({
           title: "成功",

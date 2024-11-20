@@ -15,15 +15,20 @@ export function Sidebar() {
       const { data, error } = await supabase
         .from("projects")
         .select("id, title")
+        .eq("owner_id", session?.user?.id)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
       return data;
     },
+    refetchOnMount: "always",
+    refetchOnWindowFocus: true,
+    staleTime: 0,
+    cacheTime: 0
   });
 
   return (
-    <div className="hidden lg:flex h-screen w-64 flex-col fixed left-0 top-0 border-r bg-white">
+    <div className="hidden lg:flex h-screen w-80 flex-col fixed left-0 top-0 border-r bg-white">
       <div className="p-6">
         <h2 className="text-xl font-semibold text-purple-600">Project Manager</h2>
       </div>

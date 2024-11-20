@@ -21,15 +21,20 @@ const Index = () => {
           tasks (
             id
           ),
-          contractor_companies (
+          contractor_companies!left (
             name
           )
         `)
-        .eq("owner_id", session?.user?.id);
+        .eq("owner_id", session?.user?.id)
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
       return data;
     },
+    refetchOnMount: "always",
+    refetchOnWindowFocus: true,
+    staleTime: 0,
+    cacheTime: 0
   });
 
   if (isLoading) {
