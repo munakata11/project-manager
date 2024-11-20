@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/AuthProvider";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { CalendarDays } from "lucide-react";
+import { CalendarDays, Building2 } from "lucide-react";
 import { CreateProjectDialog } from "@/components/CreateProjectDialog";
 
 const Index = () => {
@@ -20,6 +20,9 @@ const Index = () => {
           *,
           tasks (
             id
+          ),
+          contractor_companies (
+            name
           )
         `)
         .eq("owner_id", session?.user?.id);
@@ -42,7 +45,7 @@ const Index = () => {
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-2xl font-semibold text-gray-900">プロジェクト一覧</h1>
-          <p className="mt-1 text-sm text-gray-500">進行中のプロジェクトを管理</p>
+          <p className="mt-1 text-sm text-gray-500">進行中のプロジェクトをダッシュボードで管理します</p>
         </div>
         <CreateProjectDialog />
       </div>
@@ -60,22 +63,28 @@ const Index = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div>
-                  <div className="flex justify-between text-sm text-gray-500 mb-1.5">
-                    <span>進捗</span>
-                    <span>{project.progress}%</span>
-                  </div>
-                  <Progress 
-                    value={project.progress} 
-                    className="h-2 bg-gray-100" 
-                  />
-                </div>
+
                 
-                <div className="flex justify-end text-sm text-gray-500">
-                  <div className="flex items-center gap-1.5">
-                    <CalendarDays className="h-4 w-4 text-gray-400" />
-                    <span>{new Date(project.created_at).toLocaleDateString('ja-JP')}</span>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <Building2 className="h-4 w-4 text-gray-500 shrink-0" />
+                    <div>
+                      <span>受注会社：</span>
+                      <span>{project.contractor_companies?.name || "未設定"}</span>
+                    </div>
                   </div>
+                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <CalendarDays className="h-4 w-4 text-gray-500 shrink-0" />
+                    <div>
+                      <span>設計工期：</span>
+                      <span>{project.design_period 
+                        ? new Date(project.design_period).toLocaleDateString('ja-JP') 
+                        : "未設定"}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-end text-sm text-gray-500">
                 </div>
               </div>
             </CardContent>
