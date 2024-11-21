@@ -66,13 +66,25 @@ export function NoteForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <Input
-        placeholder="タイトル"
-        value={noteTitle}
-        onChange={(e) => setNoteTitle(e.target.value)}
-        className="border-gray-200"
-      />
-      
+      <div className="flex items-center">
+        <Input
+          placeholder="タイトル"
+          value={noteTitle}
+          onChange={(e) => setNoteTitle(e.target.value)}
+          className="border-gray-200"
+          disabled={useAITitle}
+        />
+        <label className="ml-2 flex items-center">
+          <input
+            type="checkbox"
+            checked={useAITitle}
+            onChange={(e) => setUseAITitle(e.target.checked)}
+            className="mr-1"
+          />
+          AI
+        </label>
+      </div>
+
       {noteType === "meeting" && (
         <>
           <Input
@@ -89,7 +101,7 @@ export function NoteForm({
           />
         </>
       )}
-      
+
       {noteType === "call" && (
         <Input
           placeholder="相手"
