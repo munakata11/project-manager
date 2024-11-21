@@ -3,9 +3,12 @@ import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/components/AuthProvider";
 
-const AuthPage = () => {
+export default function AuthPage() {
   const navigate = useNavigate();
+  const { signInAnonymously } = useAuth();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -65,10 +68,14 @@ const AuthPage = () => {
               },
             }}
           />
+          <Button
+            onClick={signInAnonymously}
+            className="w-full bg-purple-600 hover:bg-purple-700 text-white mb-4 tracking-wider"
+          >
+            サンプルページログイン
+          </Button>
         </div>
       </div>
     </div>
   );
-};
-
-export default AuthPage;
+}
